@@ -1,0 +1,24 @@
+<Application x:Class="MSPASalon.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <!-- No StartupUri: App.xaml.cs controls the login → main window flow. -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <!--
+                Order matters: a dictionary can only use StaticResource keys from dictionaries merged BEFORE it.
+                Palette.Light.xaml (colours) MUST stay first: ThemeService replaces it with Palette.Dark.xaml at runtime.
+                Colours are therefore referenced with DynamicResource everywhere.
+                Do not declare resources directly in this ResourceDictionary; put them in one of the files below.
+                Value converters are NOT resources: XAML references them through x:Static to the static class Conv
+                (see Converters/Converters.cs), which cannot fail with "Cannot find resource".
+            -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Palette.Light.xaml" />
+                <ResourceDictionary Source="Themes/Theme.xaml" />
+                <ResourceDictionary Source="Views/Editors/EditorTemplates.xaml" />
+                <ResourceDictionary Source="Views/PageTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

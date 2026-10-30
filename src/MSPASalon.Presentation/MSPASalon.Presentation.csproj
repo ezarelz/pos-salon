@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    ViewModels and UI-independent presentation logic.
+    This project deliberately has NO WPF dependency, so every ViewModel can be
+    unit-tested on any OS (including Linux/WSL and CI).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>MSPASalon.Presentation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSPASalon.Core\MSPASalon.Core.csproj" />
+  </ItemGroup>
+</Project>

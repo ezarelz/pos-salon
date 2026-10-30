@@ -1,0 +1,23 @@
+# Build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Local data — never commit real salon data (customer data, legacy database)
+.data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+legacy/
+
+# Test output
+tests/TestResults/
+
+# OS
+Thumbs.db
+.DS_Store

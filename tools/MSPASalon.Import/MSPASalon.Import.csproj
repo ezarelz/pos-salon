@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Command-line import of master data from the legacy salon.sqlite.
+    Usage: see README (dotnet run with the legacy salon.sqlite path and an optional target db path)
+    The legacy database is opened READ-ONLY and is never modified.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>MSPASalon.Import</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MSPASalon.Infrastructure\MSPASalon.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\MSPASalon.Presentation\MSPASalon.Presentation.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,20 @@
+<Project>
+  <!--
+    Shared build settings for every project in the solution.
+
+    EnableWindowsTargeting is set ONLY in MSPASalon.Desktop.csproj (see there). Setting it here
+    would make every net8.0 project download the Windows Desktop targeting pack on Linux/WSL.
+  -->
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <Company>POS Salon</Company>
+    <Product>POS Salon</Product>
+    <Version>2.0.0</Version>
+    <NeutralLanguage>id-ID</NeutralLanguage>
+    <!-- CS1591: missing XML docs. Not required for an internal application. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>

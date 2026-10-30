@@ -1,0 +1,61 @@
+<UserControl x:Class="MSPASalon.Desktop.Views.MasterListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:MSPASalon.Desktop.Converters">
+    <!--
+        Generic master list (customers, products, services, ...). Layout:
+          Row 0  toolbar in a WrapPanel   → search + buttons wrap onto a second line on narrow windows
+          Row 1  DataGrid (*)             → star column fills the width; horizontal scroll inside the grid
+                                            only if the minimum column widths do not fit
+          Row 2  status line
+        Columns come from the ViewModel (IListPage.Columns) and are created in code-behind.
+    -->
+    <Grid Margin="16,12,16,8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <WrapPanel Grid.Row="0" Margin="0,0,0,10">
+            <Grid Width="280" Margin="0,0,12,6">
+                <TextBox x:Name="SearchBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}"
+                         Padding="28,4,6,4" ToolTip="Cari (kode, nama, ...). Pisahkan kata dengan spasi." />
+                <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" Foreground="{DynamicResource MutedTextBrush}"
+                           VerticalAlignment="Center" Margin="9,0,0,0" IsHitTestVisible="False" />
+            </Grid>
+            <!-- date filter: transaction documents only -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,12,6"
+                        Visibility="{Binding HasDateFilter, Converter={x:Static conv:Conv.BoolToVisibility}}">
+                <TextBlock Text="Tanggal" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{DynamicResource MutedTextBrush}" />
+                <DatePicker SelectedDate="{Binding DateFrom}" Width="130" VerticalContentAlignment="Center" />
+                <TextBlock Text="s/d" VerticalAlignment="Center" Margin="6,0" Foreground="{DynamicResource MutedTextBrush}" />
+                <DatePicker SelectedDate="{Binding DateTo}" Width="130" VerticalContentAlignment="Center" />
+            </StackPanel>
+            <Button Content="{Binding AddLabel}" Command="{Binding AddCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6"
+                    ToolTip="Ctrl+N" Visibility="{Binding ShowAdd, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+            <Button Content="{Binding EditLabel}" Command="{Binding EditCommand}" Margin="0,0,8,6" ToolTip="Enter / klik dua kali" />
+            <Button Content="{Binding DeleteLabel}" Command="{Binding DeleteCommand}" Style="{StaticResource DangerButton}" Margin="0,0,8,6"
+                    ToolTip="Delete" />
+            <ItemsControl ItemsSource="{Binding ExtraActions}" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding Label}" Command="{Binding Command}" Margin="0,0,8,6" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="&#xE72C;" Style="{StaticResource IconButton}" Command="{Binding RefreshCommand}" Margin="0,0,0,6"
+                    ToolTip="Muat ulang (F5)" />
+        </WrapPanel>
+
+        <DataGrid x:Name="ListGrid" Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
+                  IsReadOnly="True" MouseDoubleClick="Grid_MouseDoubleClick" PreviewKeyDown="Grid_PreviewKeyDown" />
+
+        <TextBlock Grid.Row="2" Text="{Binding StatusText}" Foreground="{DynamicResource MutedTextBrush}" Margin="2,6,0,0" />
+    </Grid>
+</UserControl>

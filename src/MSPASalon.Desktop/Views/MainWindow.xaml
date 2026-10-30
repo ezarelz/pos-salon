@@ -1,0 +1,150 @@
+<Window x:Class="MSPASalon.Desktop.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:MSPASalon.Desktop.Converters"
+        Title="{Binding WindowTitle}"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource TextBrush}"
+        FontFamily="Segoe UI" FontSize="13"
+        SizeChanged="Window_SizeChanged">
+    <!--
+        Responsive shell (fixes the legacy NoResize / fixed-size windows):
+          Column 0  navigation: 232 DIP, or 56 DIP icons-only below 1000 DIP (automatic) or by the ☰ button
+                    rows: header (Auto) · menu in a ScrollViewer (*) · account actions (Auto, always visible)
+          Column 1  tabbed pages; every page manages its own scrolling and keeps its action buttons visible
+        Size: opened at up to 92% of the work area; maximized on small screens; MinWidth/MinHeight never exceed
+        the screen (see Presentation/Layout/WindowSizing.cs, unit-tested in UNIT-09).
+    -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============================================================ navigation -->
+        <Border Grid.Column="0" Background="{DynamicResource NavBackgroundBrush}"
+                Width="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.NavWidth}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="6,10,6,8" LastChildFill="True">
+                    <Button DockPanel.Dock="Left" Style="{StaticResource NavButton}" Command="{Binding ToggleNavCommand}"
+                            ToolTip="Ciutkan / lebarkan menu" Width="44">
+                        <TextBlock Text="&#xE700;" FontFamily="{StaticResource IconFont}" FontSize="16" HorizontalAlignment="Center" />
+                    </Button>
+                    <TextBlock Text="{Binding SalonName}" Foreground="{DynamicResource NavTitleBrush}" FontWeight="SemiBold" FontSize="14"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="4,0,0,0"
+                               ToolTip="{Binding SalonName}"
+                               Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                </DockPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                    <ItemsControl ItemsSource="{Binding NavSections}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,6">
+                                    <TextBlock Text="{Binding Title}" Foreground="{DynamicResource NavMutedBrush}" FontSize="11"
+                                               FontWeight="SemiBold" Margin="18,8,0,4"
+                                               Visibility="{Binding DataContext.IsNavCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                                    <ItemsControl ItemsSource="{Binding Items}" Focusable="False">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource NavButton}" ToolTip="{Binding ToolTip}"
+                                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="24" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}"
+                                                                   FontSize="15" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding Title}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Visibility="{Binding DataContext.IsNavCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding Milestone}" FontSize="10" Foreground="{DynamicResource NavMutedBrush}"
+                                                                   VerticalAlignment="Center" Margin="6,0,0,0"
+                                                                   Visibility="{Binding IsComingSoon, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- account actions: fixed at the bottom so they are always reachable -->
+                <StackPanel Grid.Row="2" Margin="0,6,0,10">
+                    <Border BorderBrush="{DynamicResource NavHoverBrush}" BorderThickness="0,1,0,0" Margin="12,0,12,6" />
+                    <TextBlock Text="{Binding UserLabel}" Foreground="{DynamicResource NavMutedBrush}" FontSize="11" Margin="18,0,8,6"
+                               TextTrimming="CharacterEllipsis" ToolTip="{Binding UserLabel}"
+                               Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                    <Button Style="{StaticResource NavButton}" Command="{Binding BackupCommand}" ToolTip="Backup database"
+                            Visibility="{Binding CanBackup, Converter={x:Static conv:Conv.BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" Width="24" TextAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="Backup Database" Margin="10,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ImportCommand}" ToolTip="Import master data dari aplikasi lama"
+                            Visibility="{Binding CanImport, Converter={x:Static conv:Conv.BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B5;" FontFamily="{StaticResource IconFont}" Width="24" TextAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="Import Data Lama" Margin="10,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ToggleThemeCommand}" ToolTip="{Binding ThemeLabel}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding ThemeGlyph}" FontFamily="{StaticResource IconFont}" Width="24" TextAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ThemeLabel}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ChangePasswordCommand}" ToolTip="Ganti password">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8D7;" FontFamily="{StaticResource IconFont}" Width="24" TextAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="Ganti Password" Margin="10,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding LogoutCommand}" ToolTip="Keluar (logout)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7E8;" FontFamily="{StaticResource IconFont}" Width="24" TextAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="Logout" Margin="10,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding IsNavCollapsed, Converter={x:Static conv:Conv.InverseBoolToVisibility}}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ============================================================ pages -->
+        <TabControl Grid.Column="1" ItemsSource="{Binding OpenPages}" SelectedItem="{Binding SelectedPage}"
+                    ContentTemplateSelector="{StaticResource PageSelector}" Margin="0" Padding="0"
+                    BorderThickness="0" Background="{DynamicResource WindowBackgroundBrush}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" MaxWidth="200" TextTrimming="CharacterEllipsis" />
+                        <Button Style="{StaticResource IconButton}" Content="&#xE711;" FontSize="9" MinHeight="18" MinWidth="18"
+                                Padding="3" Margin="8,0,0,0" ToolTip="Tutup tab" IsTabStop="False"
+                                Command="{Binding DataContext.ClosePageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}" />
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+        </TabControl>
+    </Grid>
+</Window>

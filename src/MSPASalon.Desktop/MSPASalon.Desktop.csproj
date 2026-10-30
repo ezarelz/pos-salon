@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- WPF shell: Views (XAML), converters, dialogs and composition root. Runs on Windows only. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>MSPASalon.Desktop</RootNamespace>
+    <AssemblyName>MSPASalon</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <!--
+      Allows compiling this WPF project from Linux/WSL (requires Microsoft's official .NET SDK build,
+      which ships Microsoft.NET.Sdk.WindowsDesktop). No effect on Windows. The app RUNS on Windows only.
+    -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSPASalon.Core\MSPASalon.Core.csproj" />
+    <ProjectReference Include="..\MSPASalon.Infrastructure\MSPASalon.Infrastructure.csproj" />
+    <ProjectReference Include="..\MSPASalon.Presentation\MSPASalon.Presentation.csproj" />
+  </ItemGroup>
+    <ItemGroup>
+     <Resource Include="Assets\app.ico" />
+   </ItemGroup>
+</Project>

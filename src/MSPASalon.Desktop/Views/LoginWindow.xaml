@@ -7,6 +7,7 @@
         Width="400" SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
+        Icon="/Assets/app.ico"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource TextBrush}"
         FontFamily="Segoe UI" FontSize="13">

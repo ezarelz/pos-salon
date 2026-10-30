@@ -5,6 +5,7 @@
         Title="{Binding WindowTitle}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
+        Icon="/Assets/app.ico"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource TextBrush}"
         FontFamily="Segoe UI" FontSize="13"

@@ -92,6 +92,8 @@ public sealed class DatabaseInitializer
         using var tx = DbConnectionFactory.BeginWrite(c);
 
         // Permission catalogue is code-defined; keep the table in sync (new permissions in future versions).
+        var existingPermissions = c.Query<string>("SELECT code FROM permission", transaction: tx).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var newPermissions = Permissions.All.Select(p => p.Code).Where(code => !existingPermissions.Contains(code)).ToList();
         foreach (var p in Permissions.All)
             c.Execute("""
                 INSERT INTO permission(code, name, module) VALUES (@Code, @Name, @Module)
@@ -105,9 +107,10 @@ public sealed class DatabaseInitializer
 
         // ADMIN always holds every permission, including ones added by later versions.
         c.Execute("INSERT OR IGNORE INTO role_permission(role_id, permission_code) SELECT @r, code FROM permission", new { r = adminRoleId }, tx);
-        if (cashierCreated)
-            foreach (var p in Permissions.CashierDefaults)
-                c.Execute("INSERT OR IGNORE INTO role_permission(role_id, permission_code) VALUES (@r, @p)", new { r = cashierRoleId, p }, tx);
+        // New KASIR role: all defaults. Existing KASIR role (upgrade): only defaults introduced by this version,
+        // so permissions the admin removed earlier are not given back.
+        foreach (var p in Permissions.CashierDefaults.Where(p => cashierCreated || newPermissions.Contains(p)))
+            c.Execute("INSERT OR IGNORE INTO role_permission(role_id, permission_code) VALUES (@r, @p)", new { r = cashierRoleId, p }, tx);
 
         c.Execute("INSERT OR IGNORE INTO branch(id, short_name, name, paper_width_mm) VALUES (1, 'MSPA', 'MSPA Salon', 58)", transaction: tx);
 

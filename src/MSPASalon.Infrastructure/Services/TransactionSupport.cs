@@ -140,4 +140,13 @@ internal static class Tx
             Qty = Quantity.FromStored(QtyX), Price = Price, Gross = Gross, Discount = Discount, LineTotal = LineTotal, CostPrice = CostPrice,
         };
     }
+
+    /// <summary>Writes one permanent audit_log row (cancel, reset, restore) inside the caller's transaction.</summary>
+    public static void Audit(SqliteConnection c, SqliteTransaction tx, DateTime at, string user, string action,
+        string? docType = null, long? docId = null, string? docNo = null, string? details = null) =>
+        c.Execute("""
+            INSERT INTO audit_log(at, user_name, action, doc_type, doc_id, doc_no, details)
+            VALUES (@at, @user, @action, @docType, @docId, @docNo, @details)
+            """, new { at = DbTime.ToDb(at), user, action, docType, docId, docNo, details }, tx);
+
 }

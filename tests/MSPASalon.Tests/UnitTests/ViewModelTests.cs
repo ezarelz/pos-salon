@@ -202,7 +202,8 @@ public sealed class ViewModelTests : IDisposable
         foreach (var p in vm.PermissionItems.Where(p => p.Module == "Laporan" || p.Code == Permissions.MasterProduct)) p.IsChecked = true;
         Assert.True(vm.TrySave(), vm.ErrorText ?? "");
         var saved = _db.App.Roles.GetAll().Single(r => r.Code == "SUPERVISOR");
-        Assert.True(saved.Permissions.SetEquals([Permissions.ReportView, Permissions.MasterProduct]));
+        Assert.True(saved.Permissions.SetEquals([Permissions.ReportView, Permissions.ReportCustomer, Permissions.ReportFinance,
+            Permissions.ReportCommission, Permissions.ReportAudit, Permissions.MasterProduct]));
     }
 
     [Test("VM-07", "Editor user: konfirmasi password harus sama; user baru wajib ganti password default")]

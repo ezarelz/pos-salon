@@ -126,8 +126,13 @@ public sealed class RegistrationService(DbConnectionFactory db, IClock clock) : 
             throw new BusinessException(status == RegistrationStatus.InProcess
                 ? "Registrasi sedang diproses. Batalkan melalui layar Proses Treatment."
                 : $"Registrasi berstatus {status} tidak bisa dibatalkan.");
-        c.Execute("UPDATE registration SET status = @s, cancel_reason = @r, updated_at = @now WHERE id = @id",
-            new { id, s = RegistrationStatus.Cancelled, r = $"{r} (oleh {user})", now = DbTime.ToDb(clock.Now) }, tx);
+        var at = clock.Now;
+        c.Execute("""
+            UPDATE registration SET status = @s, cancel_reason = @r, updated_at = @now, cancelled_by = @user, cancelled_at = @now
+            WHERE id = @id
+            """, new { id, s = RegistrationStatus.Cancelled, r = $"{r} (oleh {user})", now = DbTime.ToDb(at), user }, tx);
+        var regNo = c.ExecuteScalar<string>("SELECT reg_no FROM registration WHERE id = @id", new { id }, tx);
+        Tx.Audit(c, tx, at, user, "CANCEL", "REGISTRATION", id, regNo, r);
         tx.Commit();
     }
 
@@ -341,13 +346,20 @@ public sealed class TreatmentService(DbConnectionFactory db, IClock clock) : ITr
         var grand = TransactionRules.TreatmentTotal(subtotal, discount, errors);
         if (errors.Count > 0) throw new BusinessException(errors);
 
-        // Commission snapshot from the service master at posting time, credited to the final capster (§11).
+        // Commission snapshot from the service master at posting time, credited to the final capster (§11),
+        // and the material cost of each line (recipe qty x product cost price at posting time, migration 003).
+        var recipes = LoadRecipes(c, lines.Where(l => l.ServiceId.HasValue).Select(l => l.ServiceId!.Value), tx);
         foreach (var l in lines)
         {
             var commission = l.ServiceId is { } sid
                 ? c.ExecuteScalar<long?>("SELECT commission FROM service WHERE id = @sid", new { sid }, tx) ?? 0
                 : 0;
-            c.Execute("UPDATE treatment_line SET commission = @commission WHERE id = @id", new { commission, id = l.Id }, tx);
+            var materialCost = 0m;
+            if (l.ServiceId is { } sid2 && recipes.TryGetValue(sid2, out var recipe))
+                foreach (var (productId, qty) in recipe)
+                    materialCost += qty * c.ExecuteScalar<long>("SELECT cost_price FROM product WHERE id = @productId", new { productId }, tx);
+            c.Execute("UPDATE treatment_line SET commission = @commission, material_cost = @materialCost WHERE id = @id",
+                new { commission, materialCost = Money.ToStored(Money.Round(materialCost)), id = l.Id }, tx);
         }
 
         // Backflush materials (B1–B7). Never blocks completion; negative stock is reported as a warning (A4).
@@ -379,8 +391,10 @@ public sealed class TreatmentService(DbConnectionFactory db, IClock clock) : ITr
 
     public void Cancel(long treatmentId, string reason, bool allowPosted, string user)
     {
-        var r = $"{TransactionRules.RequireReason(reason)} (oleh {user})";
-        var now = DbTime.ToDb(clock.Now);
+        var reasonText = TransactionRules.RequireReason(reason);
+        var r = $"{reasonText} (oleh {user})";
+        var at = clock.Now;
+        var now = DbTime.ToDb(at);
         using var c = db.Open();
         using var tx = DbConnectionFactory.BeginWrite(c);
         var status = RequireStatus(c, tx, treatmentId, TreatmentStatus.InProgress, TreatmentStatus.Paid);
@@ -391,12 +405,17 @@ public sealed class TreatmentService(DbConnectionFactory db, IClock clock) : ITr
             c.Execute("DELETE FROM payment WHERE source_type = 'TREATMENT' AND source_id = @treatmentId", new { treatmentId }, tx);
             c.Execute("UPDATE treatment_line SET commission = 0 WHERE treatment_id = @treatmentId", new { treatmentId }, tx);
         }
-        c.Execute("UPDATE treatment SET status = @s, cancel_reason = @r, updated_at = @now WHERE id = @treatmentId",
-            new { s = TreatmentStatus.Cancelled, r, now, treatmentId }, tx);
         c.Execute("""
-            UPDATE registration SET status = @s, cancel_reason = @r, updated_at = @now
+            UPDATE treatment SET status = @s, cancel_reason = @r, updated_at = @now, cancelled_by = @user, cancelled_at = @now
+            WHERE id = @treatmentId
+            """, new { s = TreatmentStatus.Cancelled, r, now, user, treatmentId }, tx);
+        c.Execute("""
+            UPDATE registration SET status = @s, cancel_reason = @r, updated_at = @now, cancelled_by = @user, cancelled_at = @now
             WHERE id = (SELECT registration_id FROM treatment WHERE id = @treatmentId)
-            """, new { s = RegistrationStatus.Cancelled, r, now, treatmentId }, tx);
+            """, new { s = RegistrationStatus.Cancelled, r, now, user, treatmentId }, tx);
+        var docNo = c.ExecuteScalar<string>("SELECT doc_no FROM treatment WHERE id = @treatmentId", new { treatmentId }, tx);
+        Tx.Audit(c, tx, at, user, "CANCEL", "TREATMENT", treatmentId, docNo,
+            status == TreatmentStatus.Paid ? $"{reasonText} (status sebelumnya LUNAS)" : reasonText);
         tx.Commit();
     }
 }

@@ -95,3 +95,18 @@ Hasil: ✔ / ✘ + catatan singkat.
 | F-38 | Login KASIR → menu Laporan | Hanya Rekap Kas Harian (+ Laporan Lainnya); dashboard tanpa komisi | |
 | F-39 | Batalkan satu penjualan → Rekap Kas | Nota hilang dari rekap; catatan "1 dokumen dibatalkan" | |
 | F-40 | Laporan di R7 (853×440) dan mode gelap | Filter, tombol, dan tabel terlihat; teks terbaca | |
+
+## Laporan (M4b–M4c)
+
+| ID | Test Step | Expected Test Result | Hasil |
+|---|---|---|---|
+| F-41 | Jasa & Margin → Bulan ini | Per jasa: bruto, komisi, bahan, margin; rekonsiliasi berakhir di margin setelah diskon | |
+| F-42 | Produk & Laba Kotor → Bulan ini | Laba kotor = neto − HPP per produk | |
+| F-43 | Laporan Stok → Bulan ini | Akhir = stok di Kartu Stok pada tanggal akhir; tab Pemakaian bahan terisi | |
+| F-44 | Laporan Stok → Tampilkan: Di bawah minimum | Hanya produk di bawah minimum | |
+| F-45 | Batalkan 1 penjualan → Pembatalan | Tampil dengan waktu, user, alasan | |
+| F-46 | Kunjungan Customer (default) | Daftar "Perlu diingatkan" (30–60 hari) beserta No. HP | |
+| F-47 | Master Customer → pilih customer → Riwayat Kunjungan | Daftar kunjungan terbaru di atas | |
+| F-48 | Registrasi Baru → pilih customer lama | Kotak "Terakhir datang X hari lalu · jasa dengan capster" | |
+| F-49 | Pengaturan Salon → Aktif 60, Tidak aktif 30 → Simpan | Ditolak dengan pesan batas hari | |
+| F-50 | Login KASIR → menu Laporan | Rekap Kas, Stok, Kunjungan Customer saja | |

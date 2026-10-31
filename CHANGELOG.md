@@ -1,5 +1,25 @@
 # Changelog
 
+## M4b + M4c — 2026-10-31 (.NET 8)
+
+Sisa laporan BUSINESS_RULES v0.6 §14 (aturan tambahan L6–L10). Tidak ada migrasi database baru.
+
+**Laporan baru** (menu Laporan; semua bisa Cetak / PDF / Excel)
+- **Jasa & Margin** (`report.finance`): per jasa — dikerjakan, nilai bruto, komisi, biaya bahan, margin Rp & %; rekonsiliasi bruto → diskon nota → neto → margin setelah diskon. Baris lama tanpa snapshot biaya bahan diestimasi dan ditandai.
+- **Produk & Laba Kotor** (`report.finance`): per produk — qty, bruto, diskon, neto, HPP (snapshot), laba kotor, margin %.
+- **Laporan Stok** (`report.view`, termasuk KASIR): awal / beli / jual / treatment / adjustment / akhir per produk, nilai stok, pemakaian bahan treatment (pembanding opname); filter bahan, produk dijual, di bawah minimum.
+- **Pembatalan** (`report.audit`): semua dokumen BATAL dengan waktu, user pembatal, alasan, nilai.
+- **Kunjungan Customer** (`report.customer`, termasuk KASIR): status Perlu diingatkan / Tidak aktif / Aktif / Belum ada kunjungan, hari sejak kunjungan terakhir, rata-rata jarak, total belanja, jasa & capster terakhir. Default menampilkan "Perlu diingatkan".
+
+**Fitur pendukung**
+- Master Customer → tombol **Riwayat Kunjungan** (tanggal, nota, jasa, capster, total).
+- Registrasi: penanda **"Terakhir datang X hari lalu · jasa dengan capster"** saat memilih customer (bisa dimatikan).
+- Pengaturan Salon: batas hari Aktif / Tidak aktif (default 30 / 60) dan tombol penanda registrasi.
+- Menu "Laporan Lainnya" (segera) dihapus; semua 8 laporan sudah tersedia.
+
+**Verifikasi:** 87/87 test lolos (baru: M4-06..10, VM-16). File .xlsx (persen & nilai negatif) diverifikasi dengan openpyxl.
+Tampilan WPF **belum diuji** di Windows.
+
 ## M4a — 2026-10-31 (.NET 8)
 
 Laporan tahap pertama sesuai BUSINESS_RULES v0.5 §14–15 (keputusan K20–K25, T1–T4).

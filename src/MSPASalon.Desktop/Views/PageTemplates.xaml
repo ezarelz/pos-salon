@@ -282,6 +282,19 @@
                             <TextBlock Text="Catatan kaki nota (mis. 'Terima kasih atas kunjungan Anda')" Style="{StaticResource FieldLabel}" />
                             <TextBox Text="{Binding ReceiptFooter, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MultiLineTextBox}" />
                         </StackPanel>
+                        <TextBlock c:FormPanel.IsFullRow="True" Text="Kunjungan customer" Style="{StaticResource SectionTitle}" Margin="0,8,0,0" />
+                        <StackPanel>
+                            <TextBlock Text="Aktif bila datang kurang dari (hari)" Style="{StaticResource FieldLabel}" />
+                            <TextBox Text="{Binding VisitActiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberTextBox}" MaxLength="4" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Tidak aktif bila lebih dari (hari)" Style="{StaticResource FieldLabel}" />
+                            <TextBox Text="{Binding VisitInactiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberTextBox}" MaxLength="4" />
+                        </StackPanel>
+                        <StackPanel c:FormPanel.IsFullRow="True">
+                            <CheckBox IsChecked="{Binding ShowLastVisit}" Content="Tampilkan &quot;terakhir datang&quot; saat memilih customer di Registrasi" />
+                            <TextBlock Style="{StaticResource HintText}" Text="Di antara kedua batas = 'Perlu diingatkan' pada Laporan Kunjungan Customer." />
+                        </StackPanel>
                     </c:FormPanel>
                 </StackPanel>
             </ScrollViewer>

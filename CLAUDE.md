@@ -14,8 +14,9 @@ Riwayat perubahan: `CHANGELOG.md`. Daftar test: `docs/TEST_CASES.md`.
 - Selesai: M1 (master, user/role, login, import data lama, backup, shell responsif), M2 (registrasi → treatment →
   pembayaran, backflush, nota 58 mm), M3 (penjualan, pembelian, stock adjustment, kartu stok),
   M3.1 (dashboard harian, mode gelap), M3.2 (format nota `Nama x qty  harga` + logo),
-  **M4a** (migrasi 003, izin laporan, kerangka laporan + export xlsx/PDF, Rekap Kas Harian, Pendapatan, Komisi Capster).
-- Berikutnya: **M4b** (Jasa & Margin, Produk & Laba Kotor) — konfirmasi pengguna dulu sebelum mulai.
+  **M4a** (migrasi 003, izin laporan, kerangka laporan + export xlsx/PDF, Rekap Kas Harian, Pendapatan, Komisi Capster),
+  **M4b–M4c** (Jasa & Margin, Produk & Laba Kotor, Stok, Pembatalan, Kunjungan Customer + riwayat & penanda registrasi).
+- Berikutnya: **M4d** (Reset Data Transaksi + Restore Backup) — konfirmasi pengguna dulu sebelum mulai.
 - Upgrade .NET 10 ditunda; fokus .NET 8.
 
 ## Stack & struktur
@@ -58,13 +59,13 @@ Riwayat perubahan: `CHANGELOG.md`. Daftar test: `docs/TEST_CASES.md`.
 - Setiap fitur: test di `tests/` + baris di `docs/TEST_CASES.md` + skenario singkat di `docs/UAT_RESPONSIVE_CHECKLIST.md`
   (Test Step ringkas, Expected Result satu baris) + entri `CHANGELOG.md`.
 
-## M4 — Laporan (spesifikasi disetujui: `docs/BUSINESS_RULES.md` v0.5 §14–16, K20–K25, R1–R5, T1–T4)
+## M4 — Laporan (spesifikasi disetujui: `docs/BUSINESS_RULES.md` v0.6 §14–16, aturan L1–L10, K20–K25, R1–R5, T1–T4)
 | Tahap | Isi | Status |
 |---|---|---|
 | M4a | Migrasi 003, izin laporan, kerangka laporan, export xlsx/PDF, Rekap Kas Harian, Pendapatan, Komisi Capster | Selesai |
-| M4b | Jasa & Margin (bruto, K21; biaya bahan dari `treatment_line.material_cost`, estimasi resep bila NULL), Produk & Laba Kotor | Berikutnya |
-| M4c | Stok (posisi, mutasi, pemakaian bahan), Pembatalan (dari `audit_log`/`cancelled_by`), Kunjungan Customer + penanda opsional di Registrasi (K22–K24) | |
-| M4d | Reset Data Transaksi (khusus role ADMIN, R1–R5) + Restore Backup | |
+| M4b | Jasa & Margin (bruto, K21; biaya bahan dari `treatment_line.material_cost`, estimasi resep bila NULL), Produk & Laba Kotor | Selesai |
+| M4c | Stok (posisi, mutasi, pemakaian bahan), Pembatalan (dari `audit_log`/`cancelled_by`), Kunjungan Customer + penanda opsional di Registrasi (K22–K24) | Selesai |
+| M4d | Reset Data Transaksi (khusus role ADMIN, R1–R5) + Restore Backup | Berikutnya |
 
 Kerangka laporan (pakai ulang untuk laporan baru):
 - Core: `Reports/ReportModels.cs` (ReportDocument/Section/Column, ReportFormat), `ReportPeriods.cs`, `ReportBuilders.cs`, data di `ReportData.cs`.

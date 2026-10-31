@@ -52,6 +52,33 @@ public sealed class BranchService(DbConnectionFactory db) : IBranchService
         c.Execute("UPDATE branch SET logo = @image WHERE id = 1", new { image });
     }
 
+    private const string KeyActive = "customer.visit.active_days", KeyInactive = "customer.visit.inactive_days",
+        KeyShowLast = "registration.show_last_visit";
+
+    public MSPASalon.Core.Reports.VisitSettings GetVisitSettings()
+    {
+        using var c = db.Open();
+        var kv = c.Query<(string Key, string Value)>("SELECT key, value FROM app_setting WHERE key IN @keys",
+            new { keys = new[] { KeyActive, KeyInactive, KeyShowLast } }).ToDictionary(x => x.Key, x => x.Value);
+        var d = new MSPASalon.Core.Reports.VisitSettings();
+        int Int(string key, int fallback) => kv.TryGetValue(key, out var v) && int.TryParse(v, out var n) ? n : fallback;
+        return new MSPASalon.Core.Reports.VisitSettings(Int(KeyActive, d.ActiveDays), Int(KeyInactive, d.InactiveDays),
+            kv.TryGetValue(KeyShowLast, out var show) ? show == "1" : d.ShowLastVisitOnRegistration);
+    }
+
+    public void SaveVisitSettings(MSPASalon.Core.Reports.VisitSettings s)
+    {
+        if (s.ActiveDays < 1 || s.InactiveDays > 3650 || s.ActiveDays >= s.InactiveDays)
+            throw new BusinessException("Batas hari kunjungan: 'Aktif' minimal 1 hari dan harus lebih kecil dari 'Tidak aktif' (maksimal 3650 hari).");
+        using var c = db.Open();
+        using var tx = DbConnectionFactory.BeginWrite(c);
+        foreach (var (key, value) in new[] { (KeyActive, s.ActiveDays.ToString()), (KeyInactive, s.InactiveDays.ToString()),
+                     (KeyShowLast, s.ShowLastVisitOnRegistration ? "1" : "0") })
+            c.Execute("INSERT INTO app_setting(key, value) VALUES (@key, @value) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                new { key, value }, tx);
+        tx.Commit();
+    }
+
     private static string? Clean(string? v) => string.IsNullOrWhiteSpace(v) ? null : v.Trim();
 }
 

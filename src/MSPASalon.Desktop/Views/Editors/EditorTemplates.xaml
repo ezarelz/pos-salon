@@ -478,6 +478,10 @@
                     <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" MaxLength="200" />
                 </StackPanel>
             </c:FormPanel>
+            <Border Background="{DynamicResource InfoSoftBrush}" CornerRadius="6" Padding="10,6" Margin="0,10,0,0"
+                    Visibility="{Binding LastVisitText, Converter={x:Static conv:Conv.HasValueToVisibility}}">
+                <TextBlock Text="{Binding LastVisitText}" Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap" />
+            </Border>
             <Border Style="{StaticResource ErrorBox}" Margin="0,10,0,0"
                     Visibility="{Binding HasNoCapster, Converter={x:Static conv:Conv.BoolToVisibility}}">
                 <TextBlock TextWrapping="Wrap" Text="Belum ada karyawan aktif yang ditandai Capster. Tandai di Master Karyawan." />

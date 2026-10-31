@@ -1,9 +1,9 @@
-# POS Salon — Test Cases (M1–M4a)
+# POS Salon — Test Cases (M1–M4c)
 
 Jalankan: `dotnet run --project tests/MSPASalon.Tests` (filter: tambahkan `-- INT-` / `-- UNIT-` / `-- VM-`).
 Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 
-**Hasil eksekusi M4a (Linux, .NET 8.0.133): 81 / 81 PASS** (M1: 38, M2/M3: 28, dashboard: 3, nota: 3, M4a: 10).
+**Hasil eksekusi M4c (Linux, .NET 8.0.133): 87 / 87 PASS** (M1: 38, M2/M3: 28, dashboard: 3, nota: 3, M4: 16).
 
 ## Unit — aturan domain
 
@@ -121,7 +121,7 @@ Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 | INT-LOGO-01 | Logo nota: migrasi 002, simpan/hapus; format & ukuran divalidasi; data salon lain tidak berubah | PASS |
 | VM-14 | Pengaturan Salon: pilih logo → tersimpan & ikut dikirim ke printer bersama struk | PASS |
 
-## Laporan (M4a)
+## Laporan (M4a–M4c)
 
 | ID | Skenario | Hasil |
 |---|---|---|
@@ -135,6 +135,13 @@ Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 | UNIT-19 | Struk rekap kas 58 mm: per metode, total, tunai di laci, kolom paraf; semua baris ≤ 32 karakter | PASS |
 | VM-15 | Halaman laporan: hak akses menu, periode cepat/manual, validasi tanggal, export Excel, PDF, struk rekap 58 mm | PASS |
 | DASH-03 | Dashboard: komisi capster hanya tampil bagi user dengan izin laporan komisi | PASS |
+
+| M4-06 | Jasa & Margin: per jasa bruto − komisi − bahan (snapshot); baris lama tanpa snapshot diestimasi & ditandai; diskon hanya di total | PASS |
+| M4-07 | Produk & Laba Kotor: neto = bruto − diskon, HPP dari snapshot harga pokok (tidak berubah bila master diubah) | PASS |
+| M4-08 | Laporan Stok: saldo awal/mutasi/akhir per produk = ledger, nilai stok, pemakaian bahan treatment, filter di bawah minimum | PASS |
+| M4-09 | Laporan Pembatalan: semua jenis dokumen, waktu & user pembatal, alasan; registrasi dari treatment batal tidak dobel | PASS |
+| M4-10 | Kunjungan Customer: status 30/60 hari, rata-rata jarak, total belanja (jasa+produk), jasa & capster terakhir, walk-in tidak ikut | PASS |
+| VM-16 | M4b/M4c di aplikasi: menu per izin, pengaturan batas hari (validasi), penanda di Registrasi, riwayat di Master Customer | PASS |
 
 INT-01 diperbarui: kini membuat database v1 sungguhan lalu meng-upgrade ke v3.
 

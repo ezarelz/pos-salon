@@ -59,10 +59,13 @@ public sealed class RegistrationEditorViewModel : EditorViewModel
     private readonly long _id;
     private long _customerId;
     private string? _notes;
+    private string? _lastVisitText;
+    private readonly bool _showLastVisit;
 
     public RegistrationEditorViewModel(PresentationServices s, string user, Registration? existing)
     {
         _s = s; _user = user;
+        _showLastVisit = s.Branch.GetVisitSettings().ShowLastVisitOnRegistration;
         Customers = Lookups.Customers(s);
         Services = Lookups.ActiveServices(s);
         Capsters = Lookups.ActiveCapsters(s);
@@ -73,12 +76,14 @@ public sealed class RegistrationEditorViewModel : EditorViewModel
         {
             _customerId = Lookups.DefaultCustomer(s);
             Lines.Add(NewLine());
+            UpdateLastVisit();
             return;
         }
         var full = s.Registrations.Get(existing.Id) ?? throw new BusinessException("Registrasi tidak ditemukan.");
         if (full.Status != RegistrationStatus.Waiting)
             throw new BusinessException($"Registrasi {full.RegNo} berstatus {full.Status}; hanya registrasi MENUNGGU yang bisa diubah.");
         _id = full.Id; RegNo = full.RegNo; _customerId = full.CustomerId ?? 0; _notes = full.Notes;
+        UpdateLastVisit();
         foreach (var l in full.Lines) Lines.Add(new ServiceLineEditViewModel(Services, Capsters, Changed, l.ServiceId, l.EmployeeId, l.Price));
     }
 
@@ -95,7 +100,21 @@ public sealed class RegistrationEditorViewModel : EditorViewModel
     public ObservableCollection<ServiceLineEditViewModel> Lines { get; } = [];
     public RelayCommand AddLineCommand { get; }
     public RelayCommand<ServiceLineEditViewModel> RemoveLineCommand { get; }
-    public long CustomerId { get => _customerId; set => SetProperty(ref _customerId, value); }
+    public long CustomerId
+    {
+        get => _customerId;
+        set { if (SetProperty(ref _customerId, value)) UpdateLastVisit(); }
+    }
+
+    /// <summary>K24 (optional, Pengaturan Salon): "Terakhir datang 49 hari lalu · Barber dengan Capster A".</summary>
+    public string? LastVisitText { get => _lastVisitText; private set => SetProperty(ref _lastVisitText, value); }
+
+    private void UpdateLastVisit()
+    {
+        if (!_showLastVisit) return;
+        LastVisitText = _customerId == 0 || _s.Customers.Get(_customerId) is not { IsWalkIn: false } ? null
+            : _s.Reports.GetLastVisit(_customerId, _s.Clock.Now)?.Text ?? "Belum pernah treatment di aplikasi ini.";
+    }
     public string? Notes { get => _notes; set => SetProperty(ref _notes, value); }
     public string TotalText => Money.Format(Lines.Sum(l => l.Price));
     public bool HasNoCapster => Capsters.Count == 0;

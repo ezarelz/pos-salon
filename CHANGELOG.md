@@ -1,5 +1,27 @@
 # Changelog
 
+## M4a — 2026-10-31 (.NET 8)
+
+Laporan tahap pertama sesuai BUSINESS_RULES v0.5 §14–15 (keputusan K20–K25, T1–T4).
+
+**Menu Laporan baru**
+- **Rekap Kas Harian** (izin `report.view`, termasuk KASIR): per metode bayar, uang tunai yang seharusnya di laci, daftar nota + referensi QRIS; tombol **Cetak Struk Rekap** ke printer thermal (dengan kolom uang fisik & paraf).
+- **Pendapatan** (`report.finance`): per hari (termasuk hari tanpa transaksi), jasa bruto/diskon/neto, produk, per metode bayar, rincian nota.
+- **Komisi Capster** (`report.commission`): ringkasan & rincian per nota; pilihan cepat 1–15 / 16–akhir bulan ini & bulan lalu; memilih satu capster = **slip komisi** dengan kolom tanda tangan.
+- Semua laporan: **Cetak** A4 (nomor halaman), **PDF** (dialog cetak dengan *Microsoft Print to PDF* terpilih), **Excel** (.xlsx, angka & tanggal bertipe).
+- "Laporan Lainnya" (M4b/M4c) tampil sebagai "segera".
+
+**Dashboard**: kartu capster menampilkan komisi hari ini, hanya untuk user dengan izin laporan komisi.
+
+**Hak akses**: izin baru `report.customer`, `report.finance`, `report.commission`, `report.audit`. ADMIN otomatis memiliki semuanya.
+Role KASIR yang sudah ada otomatis mendapat `report.customer` (default baru) satu kali; izin yang pernah dicabut admin tidak dikembalikan.
+
+**Database — migrasi 003** (otomatis saat aplikasi dibuka): snapshot biaya bahan per baris jasa, `cancelled_by/cancelled_at`
+di semua dokumen, tabel `audit_log` (setiap pembatalan tercatat), indeks laporan. Data lama tidak berubah.
+
+**Verifikasi:** 81/81 test lolos (baru: M4-01..05, UNIT-17..19, VM-15, DASH-03; INT-01 kini menguji upgrade database v1 → v3).
+File .xlsx diverifikasi juga dengan pembaca independen (openpyxl). Layar laporan, cetak A4/PDF, dan struk rekap **belum diuji** di Windows.
+
 ## M3.2 — 2026-10-31 (.NET 8)
 
 **Format nota baru (K19)**

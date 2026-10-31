@@ -63,10 +63,13 @@ public sealed class DashboardViewModel : PageViewModel
     private readonly IClock _clock;
     private readonly Action<NavItem>? _navigate;
     private DashboardSummary? _summary;
+    private readonly bool _showCommission;
 
+    /// <param name="showCommission">Only users with report.commission see the capsters' commission (§15).</param>
     public DashboardViewModel(IDashboardService dashboard, IClock clock, string salonName, string userName,
-        IReadOnlyList<NavItem>? quickLinks = null, Action<NavItem>? navigate = null)
+        IReadOnlyList<NavItem>? quickLinks = null, Action<NavItem>? navigate = null, bool showCommission = false)
     {
+        _showCommission = showCommission;
         _dashboard = dashboard;
         _clock = clock;
         _navigate = navigate;
@@ -131,7 +134,8 @@ public sealed class DashboardViewModel : PageViewModel
         .ToList() ?? [];
 
     public IReadOnlyList<DashboardCapsterRow> Capsters => Summary?.Capsters
-        .Select(c => new DashboardCapsterRow(c.Name, $"{c.Clients} client · {c.Services} jasa", Rp(c.Amount))).ToList() ?? [];
+        .Select(c => new DashboardCapsterRow(c.Name,
+            $"{c.Clients} client · {c.Services} jasa" + (_showCommission ? $" · komisi {Rp(c.Commission)}" : ""), Rp(c.Amount))).ToList() ?? [];
 
     public IReadOnlyList<string> LowStockLines => Summary?.LowStock
         .Select(p => $"{p.Name} ({p.Code}): stok {Quantity.Format(p.StockOnHand)} {p.Unit}, minimum {Quantity.Format(p.StockMin)}")

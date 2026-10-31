@@ -27,6 +27,8 @@ public sealed class AppServices
     public IBranchService Branch { get; }
     public IBackupService Backup { get; }
     public IDashboardService Dashboard { get; }
+    public IReportService Reports { get; }
+    public IReportExporter ReportExporter { get; } = new Export.XlsxWriter();
     public ILegacyImportService LegacyImport { get; }
     public IRegistrationService Registrations { get; }
     public ITreatmentService Treatments { get; }
@@ -54,6 +56,7 @@ public sealed class AppServices
         Branch = new BranchService(Db);
         Backup = new BackupService(Db, Clock);
         Dashboard = new DashboardService(Db);
+        Reports = new ReportService(Db);
         LegacyImport = new LegacyImportService(Db, Clock);
         Registrations = new RegistrationService(Db, Clock);
         Treatments = new TreatmentService(Db, Clock);

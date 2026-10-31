@@ -72,7 +72,7 @@ public sealed record DashboardDocument(DateTime At, string DocNo, string Kind, s
 public sealed record DashboardMethodTotal(string MethodName, bool IsCash, int Count, decimal Amount);
 
 /// <summary>Work of one capster on the day. Amount = Σ service prices (before the treatment's header discount).</summary>
-public sealed record DashboardCapster(string Name, int Clients, int Services, decimal Amount);
+public sealed record DashboardCapster(string Name, int Clients, int Services, decimal Amount, decimal Commission = 0);
 
 /// <summary>
 /// Daily operational summary. Only posted documents count: treatments LUNAS and sales POSTED, by posting time.
@@ -113,4 +113,19 @@ public interface ILegacyImportService
     /// </summary>
     ImportResult Import(string legacyDatabasePath);
     bool TargetHasMasterData();
+}
+
+/// <summary>Read-only report queries (BUSINESS_RULES §14). Only posted documents; dates by posting time (L1, L2).</summary>
+public interface IReportService
+{
+    MSPASalon.Core.Reports.CashDailyReport GetCashDaily(DateTime day);
+    MSPASalon.Core.Reports.RevenueReport GetRevenue(DateTime from, DateTime to);
+    /// <param name="employeeId">null = all capsters.</param>
+    MSPASalon.Core.Reports.CommissionReport GetCommission(DateTime from, DateTime to, long? employeeId);
+}
+
+/// <summary>Writes a report to an Excel workbook (.xlsx).</summary>
+public interface IReportExporter
+{
+    void ToXlsx(MSPASalon.Core.Reports.ReportDocument document, string path);
 }

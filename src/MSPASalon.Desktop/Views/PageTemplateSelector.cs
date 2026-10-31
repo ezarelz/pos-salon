@@ -18,6 +18,7 @@ public sealed class PageTemplateSelector : DataTemplateSelector
     public DataTemplate? ComingSoonTemplate { get; set; }
     public DataTemplate? TreatmentTemplate { get; set; }
     public DataTemplate? StockCardTemplate { get; set; }
+    public DataTemplate? ReportTemplate { get; set; }
 
     public override DataTemplate? SelectTemplate(object item, DependencyObject container) => item switch
     {
@@ -27,6 +28,7 @@ public sealed class PageTemplateSelector : DataTemplateSelector
         ComingSoonViewModel => ComingSoonTemplate,
         TreatmentPageViewModel => TreatmentTemplate,
         StockCardPageViewModel => StockCardTemplate,
+        MSPASalon.Presentation.ViewModels.Reports.ReportPageViewModel => ReportTemplate,
         _ => base.SelectTemplate(item, container),
     };
 }

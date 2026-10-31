@@ -65,7 +65,7 @@ public partial class App : Application
             _app.PaymentMethods, _app.Roles, _app.Users, _app.Auth, _app.Branch, _app.Backup, _app.Dashboard,
             _app.LegacyImport, _app.Clock,
             _app.Registrations, _app.Treatments, _app.Sales, _app.Purchases, _app.Adjustments, _app.StockCards,
-            new PrintService(), theme);
+            new PrintService(), theme, _app.Reports, _app.ReportExporter);
 
         ShowLogin();
     }

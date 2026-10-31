@@ -13,27 +13,33 @@ public sealed class DatabaseTests : IDisposable
     private readonly TestDatabase _db = new();
     public void Dispose() => _db.Dispose();
 
-    [Test("INT-01", "Migrasi: skema terbaru (v2) terbentuk, upgrade v1 → v2, idempotent, foreign_keys ON, WAL")]
+    [Test("INT-01", "Migrasi: skema terbaru (v3) terbentuk, upgrade database v1 → v3, idempotent, foreign_keys ON, WAL")]
     public void MigrationCreatesSchema()
     {
         var init = new DatabaseInitializer(_db.App.Db, _db.Clock);
         var latest = DatabaseInitializer.LoadMigrations().Max(m => m.Version);
-        Assert.Equal(2, latest, "migrations 001 + 002 (logo nota)");
+        Assert.Equal(3, latest, "migrations 001 + 002 (logo nota) + 003 (laporan & audit)");
         Assert.Equal(latest, init.CurrentVersion(), "schema version");
         init.Initialize();                                   // second run must be a no-op
         Assert.Equal(latest, init.CurrentVersion(), "schema version after re-init");
 
-        // Upgrade path of an existing M1–M3.1 database (schema v1): 002 adds the logo column, data stays.
-        using (var old = _db.App.Db.Open())
+        // Upgrade path of a real M1–M3.1 database (schema v1, with data): 002 + 003 are applied, data stays.
+        var oldPath = Path.Combine(_db.Directory, "v1.db");
+        LegacySchema.CreateV1(oldPath, withCashierRole: true);
+        using (var v1 = new SqliteConnection($"Data Source={oldPath}"))
         {
-            old.Execute("ALTER TABLE branch DROP COLUMN logo");
-            old.Execute("DELETE FROM schema_version WHERE version = 2");
+            v1.Open();
+            v1.Execute("UPDATE branch SET name = 'Salon Lama' WHERE id = 1");
         }
-        var name = _db.App.Branch.Get().Name;
-        init.Initialize();
-        Assert.Equal(2, init.CurrentVersion(), "v1 → v2");
-        Assert.Equal(name, _db.App.Branch.Get().Name, "branch data kept");
-        Assert.True(_db.App.Branch.GetLogo() is null);
+        var upgraded = new Infrastructure.AppServices(oldPath, _db.Clock);
+        Assert.Equal(3, new DatabaseInitializer(upgraded.Db, _db.Clock).CurrentVersion(), "v1 → v3");
+        Assert.Equal("Salon Lama", upgraded.Branch.Get().Name, "branch data kept");
+        Assert.True(upgraded.Branch.GetLogo() is null);
+        using (var u = upgraded.Db.Open())
+        {
+            Assert.Equal(0L, u.ExecuteScalar<long>("SELECT COUNT(*) FROM audit_log"));
+            Assert.Equal("ok", u.ExecuteScalar<string>("PRAGMA integrity_check"));
+        }
 
         using var c = _db.App.Db.Open();
         Assert.Equal(1L, c.ExecuteScalar<long>("PRAGMA foreign_keys"), "foreign_keys");

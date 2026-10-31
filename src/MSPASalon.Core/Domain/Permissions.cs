@@ -25,6 +25,10 @@ public static class Permissions
     public const string TransCancelPosted = "trans.cancelposted";
 
     public const string ReportView = "report.view";
+    public const string ReportCustomer = "report.customer";
+    public const string ReportFinance = "report.finance";
+    public const string ReportCommission = "report.commission";
+    public const string ReportAudit = "report.audit";
     public const string AdminBackup = "admin.backup";
     public const string AdminImport = "admin.import";
 
@@ -48,14 +52,21 @@ public static class Permissions
         new(TransPurchase, "Pembelian", "Transaksi"),
         new(TransAdjustment, "Stock Adjustment", "Transaksi"),
         new(TransCancelPosted, "Batalkan Dokumen yang Sudah Diposting", "Transaksi"),
-        new(ReportView, "Lihat Laporan", "Laporan"),
+        new(ReportView, "Laporan Kas Harian & Stok", "Laporan"),
+        new(ReportCustomer, "Laporan Kunjungan Customer", "Laporan"),
+        new(ReportFinance, "Laporan Pendapatan & Margin", "Laporan"),
+        new(ReportCommission, "Laporan Komisi Capster", "Laporan"),
+        new(ReportAudit, "Laporan Pembatalan (Audit)", "Laporan"),
         new(AdminBackup, "Backup Database", "Administrasi"),
         new(AdminImport, "Import Data Aplikasi Lama", "Administrasi"),
     ];
 
-    /// <summary>Default permissions of the built-in KASIR role.</summary>
+    /// <summary>
+    /// Default permissions of the built-in KASIR role. When a later version adds a permission listed here, the
+    /// existing KASIR role receives it once (on the start-up that introduces it); later admin changes are kept.
+    /// </summary>
     public static readonly IReadOnlyList<string> CashierDefaults =
-        [MasterCustomer, TransRegistration, TransTreatment, TransSale, ReportView];
+        [MasterCustomer, TransRegistration, TransTreatment, TransSale, ReportView, ReportCustomer];
 }
 
 /// <summary>Built-in role codes. ADMIN always has every permission (also permissions added in later versions).</summary>

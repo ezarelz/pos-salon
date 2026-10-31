@@ -1,4 +1,4 @@
-# UAT — Responsivitas UI & Fungsional (M1–M3)
+# UAT — Responsivitas UI & Fungsional (M1–M4a)
 
 Jalankan di Windows. Ubah skala di **Settings → System → Display → Scale**, resolusi di **Display resolution**.
 Hasil: ✔ / ✘ + catatan singkat.
@@ -81,3 +81,17 @@ Hasil: ✔ / ✘ + catatan singkat.
 | F-29 | Pengaturan Salon → Pilih Logo (PNG) | Pratinjau tampil; status "Logo nota tersimpan" | |
 | F-30 | Treatment Barber + Cuci Rambut ×2 → bayar → cetak 58 mm | Logo di tengah; nama, alamat, telp; `Barber x 1`, `Cuci Rambut x 2`; tanpa nama capster | |
 | F-31 | Hapus Logo → cetak ulang dari Riwayat | Nota tanpa logo, header teks tetap | |
+
+## Laporan (M4a)
+
+| ID | Test Step | Expected Test Result | Hasil |
+|---|---|---|---|
+| F-32 | Laporan → Rekap Kas Harian (hari ini) | Total = dashboard; tunai di laci = total metode Tunai | |
+| F-33 | Rekap Kas → Cetak Struk Rekap (58 mm) | Struk per metode, total, kolom uang fisik & paraf; tidak terpotong | |
+| F-34 | Pendapatan → Bulan ini | Semua tanggal tampil; total = rekap metode bayar | |
+| F-35 | Pendapatan → Excel → simpan | File terbuka di Excel; angka bisa dijumlah; tanggal terbaca | |
+| F-36 | Pendapatan → PDF | Dialog cetak dengan Microsoft Print to PDF terpilih; PDF A4 bernomor halaman | |
+| F-37 | Komisi → Tgl 1–15 → pilih satu capster → Cetak | Slip komisi capster dengan kolom tanda tangan | |
+| F-38 | Login KASIR → menu Laporan | Hanya Rekap Kas Harian (+ Laporan Lainnya); dashboard tanpa komisi | |
+| F-39 | Batalkan satu penjualan → Rekap Kas | Nota hilang dari rekap; catatan "1 dokumen dibatalkan" | |
+| F-40 | Laporan di R7 (853×440) dan mode gelap | Filter, tombol, dan tabel terlihat; teks terbaca | |

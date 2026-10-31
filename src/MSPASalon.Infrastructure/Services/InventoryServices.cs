@@ -136,8 +136,13 @@ public sealed class SaleService(DbConnectionFactory db, IClock clock) : ISaleSer
         if (status == DocStatus.Cancelled) throw new BusinessException("Penjualan sudah dibatalkan.");
         Tx.RemoveLedger(c, tx, StockSource.Sale, id);
         c.Execute("DELETE FROM payment WHERE source_type = 'SALE' AND source_id = @id", new { id }, tx);
-        c.Execute("UPDATE sale SET status = @s, cancel_reason = @r, updated_at = @now WHERE id = @id",
-            new { id, s = DocStatus.Cancelled, r, now = DbTime.ToDb(clock.Now) }, tx);
+        var at = clock.Now;
+        c.Execute("""
+            UPDATE sale SET status = @s, cancel_reason = @r, updated_at = @now, cancelled_by = @user, cancelled_at = @now
+            WHERE id = @id
+            """, new { id, s = DocStatus.Cancelled, r, now = DbTime.ToDb(at), user }, tx);
+        Tx.Audit(c, tx, at, user, "CANCEL", "SALE", id,
+            c.ExecuteScalar<string>("SELECT doc_no FROM sale WHERE id = @id", new { id }, tx), reason.Trim());
         tx.Commit();
     }
 }
@@ -259,8 +264,13 @@ public sealed class PurchaseService(DbConnectionFactory db, IClock clock) : IPur
                                         "Barang sudah terpakai/terjual; lakukan stock adjustment bila perlu.");
             // the transaction is disposed without commit → nothing changes
         }
-        c.Execute("UPDATE purchase SET status = @s, cancel_reason = @r, updated_at = @now WHERE id = @id",
-            new { id, s = DocStatus.Cancelled, r, now = DbTime.ToDb(clock.Now) }, tx);
+        var at = clock.Now;
+        c.Execute("""
+            UPDATE purchase SET status = @s, cancel_reason = @r, updated_at = @now, cancelled_by = @user, cancelled_at = @now
+            WHERE id = @id
+            """, new { id, s = DocStatus.Cancelled, r, now = DbTime.ToDb(at), user }, tx);
+        Tx.Audit(c, tx, at, user, "CANCEL", "PURCHASE", id,
+            c.ExecuteScalar<string>("SELECT doc_no FROM purchase WHERE id = @id", new { id }, tx), reason.Trim());
         tx.Commit();
     }
 }
@@ -368,8 +378,13 @@ public sealed class AdjustmentService(DbConnectionFactory db, IClock clock) : IA
         var after = Tx.RemoveLedger(c, tx, StockSource.Adjustment, id);
         if (after.Any(kv => kv.Value < 0))
             throw new BusinessException("Adjustment tidak bisa dibatalkan karena stok salah satu produk akan menjadi minus.");
-        c.Execute("UPDATE stock_adjustment SET status = @s, cancel_reason = @r, updated_at = @now WHERE id = @id",
-            new { id, s = DocStatus.Cancelled, r, now = DbTime.ToDb(clock.Now) }, tx);
+        var at = clock.Now;
+        c.Execute("""
+            UPDATE stock_adjustment SET status = @s, cancel_reason = @r, updated_at = @now, cancelled_by = @user, cancelled_at = @now
+            WHERE id = @id
+            """, new { id, s = DocStatus.Cancelled, r, now = DbTime.ToDb(at), user }, tx);
+        Tx.Audit(c, tx, at, user, "CANCEL", "ADJUSTMENT", id,
+            c.ExecuteScalar<string>("SELECT doc_no FROM stock_adjustment WHERE id = @id", new { id }, tx), reason.Trim());
         tx.Commit();
     }
 }

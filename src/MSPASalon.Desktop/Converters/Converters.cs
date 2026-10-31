@@ -123,6 +123,16 @@ public static class ImageLoader
     }
 }
 
+/// <summary>Report cell → text, using the column kind passed as ConverterParameter (same formatting as print).</summary>
+public sealed class ReportCellConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
+        MSPASalon.Core.Reports.ReportFormat.Format(value,
+            parameter is MSPASalon.Core.Reports.ReportValueKind k ? k : MSPASalon.Core.Reports.ReportValueKind.Text);
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
+}
+
 /// <summary>
 /// Shared converter instances, referenced from XAML with <c>{x:Static conv:Conv.Name}</c>.
 /// x:Static is resolved by type, never by resource-dictionary lookup, so these can never fail with
@@ -139,4 +149,5 @@ public static class Conv
     public static readonly QtyConverter Qty = new();
     public static readonly DateTimeTextConverter DateTimeText = new();
     public static readonly ImageBytesConverter ImageBytes = new();
+    public static readonly ReportCellConverter ReportCell = new();
 }

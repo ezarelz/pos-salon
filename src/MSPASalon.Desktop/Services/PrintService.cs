@@ -70,4 +70,6 @@ public sealed class PrintService : IPrintService
         dialog.PrintDocument(((IDocumentPaginatorSource)document).DocumentPaginator, jobName);
         return true;
     }
+
+    public bool PrintReport(MSPASalon.Core.Reports.ReportDocument document, bool toPdf) => ReportPrinting.Print(document, toPdf);
 }

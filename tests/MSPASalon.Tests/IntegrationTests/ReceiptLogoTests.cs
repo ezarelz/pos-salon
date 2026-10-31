@@ -25,7 +25,7 @@ public sealed class ReceiptLogoTests : IDisposable
     [Test("INT-LOGO-01", "Logo nota: migrasi 002, simpan/hapus; format & ukuran divalidasi; data salon lain tidak berubah")]
     public void LogoStorage()
     {
-        Assert.Equal(2, new Infrastructure.Database.DatabaseInitializer(A.Db, A.Clock).CurrentVersion(), "schema v2");
+        Assert.True(new Infrastructure.Database.DatabaseInitializer(A.Db, A.Clock).CurrentVersion() >= 2, "schema ≥ v2");
         Assert.True(A.Branch.GetLogo() is null, "default tanpa logo");
         var before = A.Branch.Get().Name;
         A.Branch.SaveLogo(Png);

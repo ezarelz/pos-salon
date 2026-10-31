@@ -21,6 +21,10 @@ public sealed class FakeDialogs : IDialogService
     public bool ShowEditor(EditorViewModel editor) => OnEditor?.Invoke(editor) ?? false;
     public string? OpenFile { get; set; }
     public string? PickOpenFile(string title, string filter) => OpenFile;
+    /// <summary>Folder used by the fake save dialog (null = user cancels). The default file name is appended.</summary>
+    public string? SaveFolder { get; set; }
+    public string? PickSaveFile(string title, string filter, string defaultFileName) =>
+        SaveFolder is null ? null : Path.Combine(SaveFolder, defaultFileName);
     public string? PickFolder(string title) => null;
 }
 
@@ -29,6 +33,9 @@ public sealed class FakePrint : IPrintService
     public List<(IReadOnlyList<string> Lines, int Paper, string Job, byte[]? Logo)> Jobs { get; } = [];
     public bool PrintReceipt(IReadOnlyList<string> lines, int paperWidthMm, string jobName, byte[]? logo = null)
     { Jobs.Add((lines, paperWidthMm, jobName, logo)); return true; }
+
+    public List<(MSPASalon.Core.Reports.ReportDocument Doc, bool ToPdf)> Reports { get; } = [];
+    public bool PrintReport(MSPASalon.Core.Reports.ReportDocument document, bool toPdf) { Reports.Add((document, toPdf)); return true; }
 }
 
 public sealed class FakeTheme : IThemeService
@@ -45,7 +52,8 @@ public sealed class ViewModelTests : IDisposable
     internal static PresentationServices Services(AppServices a, IPrintService? print = null, IThemeService? theme = null) => new(
         a.Customers, a.Suppliers, a.Categories, a.Employees, a.Products, a.Services, a.PaymentMethods, a.Roles,
         a.Users, a.Auth, a.Branch, a.Backup, a.Dashboard, a.LegacyImport, a.Clock,
-        a.Registrations, a.Treatments, a.Sales, a.Purchases, a.Adjustments, a.StockCards, print ?? new FakePrint(), theme ?? new FakeTheme());
+        a.Registrations, a.Treatments, a.Sales, a.Purchases, a.Adjustments, a.StockCards, print ?? new FakePrint(), theme ?? new FakeTheme(),
+        a.Reports, a.ReportExporter);
 
     [Test("VM-01", "Editor produk: input Indonesia ('28.000', '0,5') tersimpan; input salah tampil di ErrorText")]
     public void ProductEditor()
@@ -159,7 +167,7 @@ public sealed class ViewModelTests : IDisposable
         shell.Navigate(shell.NavItems.Single(n => n.Key == "trans:treatment"));
         Assert.True(shell.SelectedPage is MSPASalon.Presentation.ViewModels.Transactions.TreatmentPageViewModel, "M2 treatment page");
         shell.ClosePageCommand.Execute(shell.SelectedPage);
-        shell.Navigate(shell.NavItems.Single(n => n.Key == "report"));
+        shell.Navigate(shell.NavItems.Single(n => n.Key == "report:more"));
         Assert.True(shell.SelectedPage is ComingSoonViewModel, "M4 placeholder");
         shell.ClosePageCommand.Execute(shell.SelectedPage);
         Assert.Equal(2, shell.OpenPages.Count);
@@ -202,7 +210,8 @@ public sealed class ViewModelTests : IDisposable
         foreach (var p in vm.PermissionItems.Where(p => p.Module == "Laporan" || p.Code == Permissions.MasterProduct)) p.IsChecked = true;
         Assert.True(vm.TrySave(), vm.ErrorText ?? "");
         var saved = _db.App.Roles.GetAll().Single(r => r.Code == "SUPERVISOR");
-        Assert.True(saved.Permissions.SetEquals([Permissions.ReportView, Permissions.MasterProduct]));
+        Assert.True(saved.Permissions.SetEquals([Permissions.ReportView, Permissions.ReportCustomer, Permissions.ReportFinance,
+            Permissions.ReportCommission, Permissions.ReportAudit, Permissions.MasterProduct]));
     }
 
     [Test("VM-07", "Editor user: konfirmasi password harus sama; user baru wajib ganti password default")]

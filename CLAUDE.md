@@ -3,11 +3,19 @@
 Baca file ini sebelum mengubah kode. Sumber kebenaran aturan bisnis: `docs/BUSINESS_RULES.md`.
 Riwayat perubahan: `CHANGELOG.md`. Daftar test: `docs/TEST_CASES.md`.
 
+## Repo & kustomisasi pengguna
+- Sumber kebenaran kode: https://github.com/ezarelz/pos-salon (branch utama). Sesi baru: clone repo ini, jangan pakai salinan lama.
+- Nama tampil aplikasi: **POS Salon** (judul window/login/dialog, Product/Company). AssemblyName tetap `MSPASalon`,
+  folder data tetap `%LOCALAPPDATA%\MSPASalon\`, namespace/proyek tetap `MSPASalon.*`.
+- Ikon: `src/MSPASalon.Desktop/Assets/app.ico` (16–256 px) via `<ApplicationIcon>`.
+- Judul nota treatment diubah pengguna menjadi "Faktur Penjualan"; kartu dashboard "Kinerja karyawan hari ini".
+
 ## Status
 - Selesai: M1 (master, user/role, login, import data lama, backup, shell responsif), M2 (registrasi → treatment →
   pembayaran, backflush, nota 58 mm), M3 (penjualan, pembelian, stock adjustment, kartu stok),
-  M3.1 (dashboard harian, mode gelap), M3.2 (format nota `Nama x qty  harga` + logo).
-- Berikutnya: **M4 Laporan** — lihat bagian "M4" di bawah. Jangan mulai tanpa konfirmasi pengguna.
+  M3.1 (dashboard harian, mode gelap), M3.2 (format nota `Nama x qty  harga` + logo),
+  **M4a** (migrasi 003, izin laporan, kerangka laporan + export xlsx/PDF, Rekap Kas Harian, Pendapatan, Komisi Capster).
+- Berikutnya: **M4b** (Jasa & Margin, Produk & Laba Kotor) — konfirmasi pengguna dulu sebelum mulai.
 - Upgrade .NET 10 ditunda; fokus .NET 8.
 
 ## Stack & struktur
@@ -50,13 +58,32 @@ Riwayat perubahan: `CHANGELOG.md`. Daftar test: `docs/TEST_CASES.md`.
 - Setiap fitur: test di `tests/` + baris di `docs/TEST_CASES.md` + skenario singkat di `docs/UAT_RESPONSIVE_CHECKLIST.md`
   (Test Step ringkas, Expected Result satu baris) + entri `CHANGELOG.md`.
 
-## M4 — Laporan (rencana, belum dimulai)
-Cakupan dari TECHNICAL_ARCHITECTURE §6: pendapatan, komisi, margin jasa, stok, rekap metode bayar + export Excel/PDF.
-Keputusan yang sudah ada:
-- Laporan Komisi Capster = **opsi B**: menu Laporan → Komisi Capster, filter periode (mis. 1–15 / 1 bulan),
-  ringkasan per capster (client, jasa, nilai jasa, total komisi) + rincian per nota, bisa dicetak. Ditambah ringkasan komisi di kartu capster dashboard.
-Keputusan yang MASIH TERBUKA (tanyakan sebelum membangun):
-1. Diskon nota memotong komisi? (sekarang: tidak — komisi = master jasa).
-2. Format export: Excel (.xlsx), PDF, atau keduanya.
-3. Hak akses laporan: ADMIN saja, atau KASIR boleh melihat sebagian (mis. rekap kas harian)?
-4. Laporan mana yang paling dibutuhkan lebih dulu (urutan pengerjaan).
+## M4 — Laporan (spesifikasi disetujui: `docs/BUSINESS_RULES.md` v0.5 §14–16, K20–K25, R1–R5, T1–T4)
+| Tahap | Isi | Status |
+|---|---|---|
+| M4a | Migrasi 003, izin laporan, kerangka laporan, export xlsx/PDF, Rekap Kas Harian, Pendapatan, Komisi Capster | Selesai |
+| M4b | Jasa & Margin (bruto, K21; biaya bahan dari `treatment_line.material_cost`, estimasi resep bila NULL), Produk & Laba Kotor | Berikutnya |
+| M4c | Stok (posisi, mutasi, pemakaian bahan), Pembatalan (dari `audit_log`/`cancelled_by`), Kunjungan Customer + penanda opsional di Registrasi (K22–K24) | |
+| M4d | Reset Data Transaksi (khusus role ADMIN, R1–R5) + Restore Backup | |
+
+Kerangka laporan (pakai ulang untuk laporan baru):
+- Core: `Reports/ReportModels.cs` (ReportDocument/Section/Column, ReportFormat), `ReportPeriods.cs`, `ReportBuilders.cs`, data di `ReportData.cs`.
+- Infrastructure: `Services/ReportService.cs` (query), `Export/XlsxWriter.cs` (xlsx tanpa NuGet).
+- Presentation: `ViewModels/Reports/ReportPages.cs` — turunkan `ReportPageViewModel`, implement `BuildDocument`, panggil `Activate()`.
+- Desktop: satu `ReportTemplate` + `Controls/ReportGrid.cs`; cetak A4/PDF di `Services/ReportPrinting.cs`.
+- Laporan baru = data record + builder + query + VM + entri menu (izin sesuai §15) + test. Tidak perlu XAML baru.
+
+## Rilis & installer (direncanakan SETELAH M4)
+Urutan yang disepakati: **M4 → upgrade .NET 10 LTS → publish + installer**.
+.NET 8 berakhir masa dukungannya 10 Nov 2026; .NET 10 LTS didukung sampai Nov 2028, jadi installer final dibuat di .NET 10.
+Rencana teknis (sudah didiskusikan, belum dibuat):
+- `dotnet publish` self-contained, win-x64, PublishSingleFile + IncludeNativeLibrariesForSelfExtract (wajib untuk e_sqlite3),
+  ReadyToRun; JANGAN PublishTrimmed (WPF tidak mendukung). Disimpan sebagai publish profile `win-x64.pubxml`.
+- Installer: **Inno Setup** (`installer/POSSalon.iss`) + `build-installer.ps1` (test → publish → ISCC); opsional GitHub Actions saat tag `v*`.
+- AppId tetap (upgrade, bukan instal dobel); data di `%LOCALAPPDATA%\MSPASalon\` TIDAK disentuh installer/uninstaller;
+  disarankan backup otomatis `.db` sebelum upgrade. Tanpa code signing → SmartScreen "More info → Run anyway".
+Keputusan terbuka untuk rilis:
+1. Self-contained (disarankan) atau framework-dependent.
+2. Per-machine (Program Files) atau per-user.
+3. Nama exe tetap `MSPASalon.exe` atau `POSSalon.exe` (bila diganti: alamat palet di ThemeService.cs harus dibuat relatif).
+4. Build lokal saja atau + GitHub Actions.

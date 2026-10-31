@@ -110,6 +110,7 @@ public sealed class DashboardService(DbConnectionFactory db) : IDashboardService
         public int Clients { get; set; }
         public int Services { get; set; }
         public long Amount { get; set; }
+        public long Commission { get; set; }
     }
 
     public DashboardSummary GetSummary(DateTime day)
@@ -149,12 +150,13 @@ public sealed class DashboardService(DbConnectionFactory db) : IDashboardService
             .ToList();
 
         var capsters = c.Query<CapsterRow>("""
-                SELECT l.employee_name AS Name, COUNT(DISTINCT l.treatment_id) AS Clients, COUNT(*) AS Services, SUM(l.price) AS Amount
+                SELECT l.employee_name AS Name, COUNT(DISTINCT l.treatment_id) AS Clients, COUNT(*) AS Services, SUM(l.price) AS Amount,
+                       SUM(l.commission) AS Commission
                 FROM treatment_line l JOIN treatment t ON t.id = l.treatment_id
                 WHERE t.status = 'LUNAS' AND t.posted_at >= @f AND t.posted_at < @t
                 GROUP BY l.employee_name ORDER BY Clients DESC, Amount DESC, Name
                 """, new { f = from, t = to })
-            .Select(r => new DashboardCapster(r.Name, r.Clients, r.Services, Money.FromStored(r.Amount)))
+            .Select(r => new DashboardCapster(r.Name, r.Clients, r.Services, Money.FromStored(r.Amount), Money.FromStored(r.Commission)))
             .ToList();
 
         var low = c.Query<LowRow>("""

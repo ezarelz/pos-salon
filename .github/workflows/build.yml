@@ -1,0 +1,59 @@
+# Build & installer on GitHub's Windows runners.
+#  - every push to main and every pull request: tests + full solution build (including the WPF app) + installer artifact
+#  - tag v<Version> (e.g. v2.0.0, must match <Version> in Directory.Build.props): also publishes a GitHub Release
+#    with POSSalon-Setup-<Version>.exe attached
+name: Build & Installer
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed only to create the GitHub Release on tags
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Test (Core / Infrastructure / Presentation)
+        run: dotnet run --project tests/MSPASalon.Tests -c Release
+
+      - name: Build seluruh solution (termasuk WPF)
+        run: dotnet build MSPASalon.sln -c Release
+
+      - name: Pasang Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Buat installer
+        shell: pwsh
+        run: ./build-installer.ps1 -SkipTests
+
+      - name: Cek tag = versi
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          [xml]$p = Get-Content -Raw Directory.Build.props
+          $v = @($p.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ })[0]
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} tidak sama dengan versi v$v di Directory.Build.props" }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: POSSalon-Setup
+          path: installer/Output/*.exe
+          if-no-files-found: error
+
+      - name: GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/*.exe
+          generate_release_notes: true

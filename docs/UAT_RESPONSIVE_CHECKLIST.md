@@ -124,3 +124,14 @@ Hasil: ✔ / ✘ + catatan singkat.
 | F-57 | Registrasi baru | Nomor `…/RG/0001` | |
 | F-58 | Restore Backup → pilih file `…_sebelum-reset.db` → password → Restore | Ringkasan isi tampil; setelah restore kembali ke login; transaksi lama kembali | |
 | F-59 | Restore → pilih file bukan backup (mis. .txt diganti .db) | Pesan "bukan database SQLite"/"bukan backup aplikasi" | |
+
+## Installer (v2.0.0) — uji di PC/VM yang bersih bila memungkinkan
+
+| ID | Test Step | Expected Test Result | Hasil |
+|---|---|---|---|
+| F-60 | Jalankan installer di PC tanpa .NET 10 Desktop Runtime | Pesan runtime belum ada; Yes membuka halaman unduhan | |
+| F-61 | Pasang runtime → jalankan installer lagi | Terpasang di `C:\Program Files\POS Salon`; shortcut Start Menu | |
+| F-62 | Buka dari Start Menu | Judul & ikon POS Salon; data lama (bila ada) terbaca | |
+| F-63 | Mode gelap → tutup → buka lagi | Tetap gelap (palet tema terbaca dengan nama exe baru) | |
+| F-64 | Pasang installer yang sama/lebih baru saat aplikasi terbuka | Aplikasi ditutup; tidak terpasang dobel di Apps | |
+| F-65 | Uninstall | Program hilang; pesan lokasi data; `%LOCALAPPDATA%\MSPASalon` tetap ada | |

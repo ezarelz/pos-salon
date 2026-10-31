@@ -157,7 +157,8 @@ public sealed class AdministrationService(DbConnectionFactory db, IClock clock, 
             throw new BusinessException("File ini adalah database yang sedang dipakai, bukan file backup.");
 
         var header = new byte[16];
-        using (var fs = File.OpenRead(full))
+        // Share read/write/delete: on Windows the file may still be open elsewhere (another program, a pooled handle).
+        using (var fs = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
             if (fs.Read(header, 0, 16) < 16 || System.Text.Encoding.ASCII.GetString(header, 0, 15) != "SQLite format 3")
                 throw new BusinessException("File ini bukan database SQLite.");
 

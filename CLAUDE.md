@@ -5,7 +5,7 @@ Riwayat perubahan: `CHANGELOG.md`. Daftar test: `docs/TEST_CASES.md`.
 
 ## Repo & kustomisasi pengguna
 - Sumber kebenaran kode: https://github.com/ezarelz/pos-salon (branch utama). Sesi baru: clone repo ini, jangan pakai salinan lama.
-- Nama tampil aplikasi: **POS Salon** (judul window/login/dialog, Product/Company). AssemblyName tetap `MSPASalon`,
+- Nama tampil aplikasi: **POS Salon** (judul window/login/dialog, Product/Company). AssemblyName/exe **`POSSalon`** (sejak v2.0.0),
   folder data tetap `%LOCALAPPDATA%\MSPASalon\`, namespace/proyek tetap `MSPASalon.*`.
 - Ikon: `src/MSPASalon.Desktop/Assets/app.ico` (16–256 px) via `<ApplicationIcon>`.
 - Judul nota treatment diubah pengguna menjadi "Faktur Penjualan"; kartu dashboard "Kinerja karyawan hari ini".
@@ -17,11 +17,11 @@ Riwayat perubahan: `CHANGELOG.md`. Daftar test: `docs/TEST_CASES.md`.
   **M4a** (migrasi 003, izin laporan, kerangka laporan + export xlsx/PDF, Rekap Kas Harian, Pendapatan, Komisi Capster),
   **M4b–M4c** (Jasa & Margin, Produk & Laba Kotor, Stok, Pembatalan, Kunjungan Customer + riwayat & penanda registrasi),
   **M4d** (Reset Data Transaksi + Restore Backup, khusus role ADMIN; `Services/AdministrationService.cs`, `ViewModels/AdminPages.cs`).
-- Berikutnya: **Rilis** — upgrade .NET 10 LTS → publish → installer (lihat bagian Rilis). Konfirmasi pengguna dulu sebelum mulai.
-- Masih .NET 8 sampai tahap Rilis dimulai.
+  **Rilis v2.0.0**: .NET 10 LTS, POSSalon.exe, backup otomatis sebelum upgrade skema, installer Inno Setup, GitHub Actions.
+- Berikutnya: belum ditentukan — tanyakan pengguna (perbaikan dari uji Windows / fitur baru).
 
 ## Stack & struktur
-- .NET 8, C# 12, WPF, SQLite (Microsoft.Data.Sqlite 8.0.10), Dapper 2.1.35, CommunityToolkit.Mvvm 8.2.2 (tanpa source generator).
+- .NET 10 LTS (`global.json` SDK 10.0.x), C# 12, WPF, SQLite (Microsoft.Data.Sqlite 10.0.14), Dapper 2.1.35, CommunityToolkit.Mvvm 8.2.2 (tanpa source generator).
 - `src/MSPASalon.Core` — entity, aturan domain murni (Money, Quantity, ReceiptBuilder, TransactionRules), interface service.
 - `src/MSPASalon.Infrastructure` — SQLite, migrasi (`Database/Migrations/NNN_*.sql`, embedded), service.
 - `src/MSPASalon.Presentation` — ViewModel **tanpa referensi WPF** (bisa dites di Linux).
@@ -75,17 +75,14 @@ Kerangka laporan (pakai ulang untuk laporan baru):
 - Desktop: satu `ReportTemplate` + `Controls/ReportGrid.cs`; cetak A4/PDF di `Services/ReportPrinting.cs`.
 - Laporan baru = data record + builder + query + VM + entri menu (izin sesuai §15) + test. Tidak perlu XAML baru.
 
-## Rilis & installer (direncanakan SETELAH M4)
-Urutan yang disepakati: **M4 → upgrade .NET 10 LTS → publish + installer**.
-.NET 8 berakhir masa dukungannya 10 Nov 2026; .NET 10 LTS didukung sampai Nov 2028, jadi installer final dibuat di .NET 10.
-Rencana teknis (sudah didiskusikan, belum dibuat):
-- `dotnet publish` self-contained, win-x64, PublishSingleFile + IncludeNativeLibrariesForSelfExtract (wajib untuk e_sqlite3),
-  ReadyToRun; JANGAN PublishTrimmed (WPF tidak mendukung). Disimpan sebagai publish profile `win-x64.pubxml`.
-- Installer: **Inno Setup** (`installer/POSSalon.iss`) + `build-installer.ps1` (test → publish → ISCC); opsional GitHub Actions saat tag `v*`.
-- AppId tetap (upgrade, bukan instal dobel); data di `%LOCALAPPDATA%\MSPASalon\` TIDAK disentuh installer/uninstaller;
-  disarankan backup otomatis `.db` sebelum upgrade. Tanpa code signing → SmartScreen "More info → Run anyway".
-Keputusan terbuka untuk rilis:
-1. Self-contained (disarankan) atau framework-dependent.
-2. Per-machine (Program Files) atau per-user.
-3. Nama exe tetap `MSPASalon.exe` atau `POSSalon.exe` (bila diganti: alamat palet di ThemeService.cs harus dibuat relatif).
-4. Build lokal saja atau + GitHub Actions.
+## Rilis & installer (v2.0.0, panduan: `docs/RELEASE.md`)
+Keputusan: **framework-dependent** (PC kasir butuh .NET 10 Desktop Runtime x64; installer memeriksanya), **per-machine**
+(`C:\Program Files\POS Salon`), exe **POSSalon.exe**, build **lokal + GitHub Actions**.
+- Publish profile `src/MSPASalon.Desktop/Properties/PublishProfiles/win-x64.pubxml` (single file, IncludeNativeLibrariesForSelfExtract,
+  ReadyToRun, JANGAN PublishTrimmed). `build-installer.ps1` = test → publish → ISCC.
+- `installer/POSSalon.iss`: `AppId` JANGAN diubah; data di `%LOCALAPPDATA%\MSPASalon\` tidak disentuh; [Run] memakai `runasoriginaluser`.
+- Backup sebelum upgrade dilakukan aplikasi (`DatabaseInitializer.BackupBeforeUpgrade`), bukan installer (installer berjalan sebagai admin,
+  bukan user kasir).
+- `.github/workflows/build.yml`: Windows runner — test, build solution (WPF ikut terverifikasi), installer artifact; tag `v<Version>` → Release.
+  Hasil run bisa dicek dengan `gh api repos/ezarelz/pos-salon/actions/runs`.
+- Rilis baru: naikkan `<Version>` di `Directory.Build.props` + CHANGELOG → merge → tag `v<Version>` → push tag.

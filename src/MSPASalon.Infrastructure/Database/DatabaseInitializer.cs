@@ -65,7 +65,11 @@ public sealed class DatabaseInitializer
             c.Execute("PRAGMA journal_mode = WAL;");
             EnsureVersionTable(c);
             var current = c.ExecuteScalar<int?>("SELECT MAX(version) FROM schema_version") ?? 0;
-            foreach (var m in LoadMigrations().Where(m => m.Version > current))
+            var pending = LoadMigrations().Where(m => m.Version > current).ToList();
+            // An existing database is copied BEFORE its schema is changed by a newer app version, so an upgrade can
+            // always be undone (Pengaturan → Restore Backup). Without a backup the upgrade does not start.
+            if (current > 0 && pending.Count > 0) LastUpgradeBackup = BackupBeforeUpgrade(c, current);
+            foreach (var m in pending)
             {
                 using var tx = DbConnectionFactory.BeginWrite(c);
                 using (var cmd = c.CreateCommand())
@@ -80,6 +84,32 @@ public sealed class DatabaseInitializer
             }
         }
         Seed();
+    }
+
+    /// <summary>Path of the backup made before the last schema upgrade in this process, or null.</summary>
+    public string? LastUpgradeBackup { get; private set; }
+
+    private string BackupBeforeUpgrade(SqliteConnection source, int fromVersion)
+    {
+        var dir = Path.Combine(Path.GetDirectoryName(_factory.DatabasePath)!, "backup");
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var file = Path.Combine(dir, $"mspasalon_{_clock.Now:yyyyMMdd_HHmmss}_sebelum-upgrade-v{fromVersion}.db");
+            for (var n = 2; File.Exists(file); n++)
+                file = Path.Combine(dir, $"mspasalon_{_clock.Now:yyyyMMdd_HHmmss}_sebelum-upgrade-v{fromVersion}_{n}.db");
+            using var target = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = file, Pooling = false }.ToString());
+            target.Open();
+            source.BackupDatabase(target);
+            DbConnectionFactory.MakeSelfContained(target);
+            return file;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SqliteException)
+        {
+            throw new InvalidOperationException(
+                $"Database perlu diperbarui ke versi baru, tetapi backup otomatis sebelum pembaruan gagal dibuat di {dir}. " +
+                $"Pembaruan dibatalkan; database tidak diubah. ({ex.Message})", ex);
+        }
     }
 
     private static void EnsureVersionTable(SqliteConnection c) =>

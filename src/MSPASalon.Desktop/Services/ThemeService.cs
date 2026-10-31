@@ -15,8 +15,9 @@ namespace MSPASalon.Desktop.Services;
 /// </summary>
 public sealed class ThemeService : IThemeService
 {
-    private const string LightPalette = "/MSPASalon;component/Themes/Palette.Light.xaml";
-    private const string DarkPalette = "/MSPASalon;component/Themes/Palette.Dark.xaml";
+    // Root-relative pack URIs ("/Themes/..." = this application's assembly), so renaming the exe never breaks the theme.
+    private const string LightPalette = "/Themes/Palette.Light.xaml";
+    private const string DarkPalette = "/Themes/Palette.Dark.xaml";
 
     private static readonly string SettingsFile = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSPASalon", "ui-settings.json");

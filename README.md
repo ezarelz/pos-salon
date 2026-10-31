@@ -1,14 +1,14 @@
-# MSPA Salon
+# POS Salon
 
 Aplikasi desktop manajemen salon (Windows): master data, registrasi customer → proses treatment → pembayaran,
 backflush bahan habis pakai, penjualan produk, dan inventori berbasis stock ledger.
 Dibangun ulang dari nol menggantikan aplikasi MSPA Salon lama (lihat `docs/PHASE1_DISCOVERY.md`).
 
-**Teknologi:** .NET 8 · C# 12 · WPF · SQLite · Dapper · CommunityToolkit.Mvvm
+**Teknologi:** .NET 10 LTS · C# 12 · WPF · SQLite · Dapper · CommunityToolkit.Mvvm
 
-**Status: Milestone M4 selesai (M4d)** (lihat `CHANGELOG.md`): reset data transaksi & restore backup (ADMIN), 8 laporan (Rekap Kas, Pendapatan, Komisi, Jasa & Margin, Produk & Laba Kotor, Stok, Pembatalan, Kunjungan Customer) + export Excel/PDF, format nota + logo, dashboard harian, mode gelap, master data, user & role, login, import data lama, backup, shell responsif,
+**Status: v2.0.0 siap rilis** (lihat `CHANGELOG.md`): installer Windows (`POSSalon-Setup-<versi>.exe`, lihat `docs/RELEASE.md`), reset data transaksi & restore backup (ADMIN), 8 laporan (Rekap Kas, Pendapatan, Komisi, Jasa & Margin, Produk & Laba Kotor, Stok, Pembatalan, Kunjungan Customer) + export Excel/PDF, format nota + logo, dashboard harian, mode gelap, master data, user & role, login, import data lama, backup, shell responsif,
 registrasi → proses treatment → pembayaran + backflush + nota 58 mm, penjualan, pembelian, stock adjustment, kartu stok.
-Laporan & export menyusul di M4. Rencana lengkap: `docs/TECHNICAL_ARCHITECTURE.md` §6.
+Rencana & riwayat milestone: `docs/TECHNICAL_ARCHITECTURE.md` §6.
 
 ---
 
@@ -17,11 +17,13 @@ Laporan & export menyusul di M4. Rencana lengkap: `docs/TECHNICAL_ARCHITECTURE.m
 | Kebutuhan | Keterangan |
 |---|---|
 | Windows 10/11 | Untuk **menjalankan** aplikasi (WPF hanya berjalan di Windows) |
-| .NET 8 SDK (x64) | `winget install Microsoft.DotNet.SDK.8` atau https://dotnet.microsoft.com/download/dotnet/8.0 |
+| .NET 10 SDK (x64) | `winget install Microsoft.DotNet.SDK.10` atau https://dotnet.microsoft.com/download/dotnet/10.0 (versi dikunci oleh `global.json`) |
 | Visual Studio Code | + ekstensi **C# Dev Kit** (`ms-dotnettools.csdevkit`) |
 | Git | Opsional |
 
-Cek: `dotnet --list-sdks` → harus ada `8.0.x`.
+Cek: `dotnet --list-sdks` → harus ada `10.0.x`.
+
+> **PC kasir** (yang hanya memakai aplikasi) tidak perlu SDK: cukup pasang installer, plus **.NET 10 Desktop Runtime (x64)**. Lihat `docs/RELEASE.md`.
 
 ## 2. Build & Run (Windows, terminal PowerShell di VS Code)
 
@@ -56,7 +58,7 @@ Test tidak membutuhkan WPF, jadi juga bisa dijalankan di WSL/Linux.
 
 Proyek WPF memakai `EnableWindowsTargeting=true`, sehingga bisa **di-compile** dari WSL/Linux, tetapi **tidak bisa dijalankan** di sana.
 
-* Gunakan .NET SDK resmi Microsoft (`dotnet-install.sh` atau repo packages.microsoft.com). SDK *source-built* dari paket Ubuntu (`apt install dotnet-sdk-8.0`) **tidak** menyertakan `Microsoft.NET.Sdk.WindowsDesktop`, sehingga proyek WPF gagal dimuat. Proyek lain (Core, Infrastructure, Presentation, Tests, Import) tetap bisa.
+* Gunakan .NET SDK resmi Microsoft (`dotnet-install.sh` atau repo packages.microsoft.com). SDK *source-built* dari paket Ubuntu (`apt install dotnet-sdk-10.0`) **tidak** menyertakan `Microsoft.NET.Sdk.WindowsDesktop`, sehingga proyek WPF gagal dimuat. Proyek lain (Core, Infrastructure, Presentation, Tests, Import) tetap bisa.
 * Simpan repo di sisi Windows (mis. `C:\dev\MSPASalon`) dan jalankan aplikasi dari PowerShell. Build dari `/mnt/c/...` di WSL berfungsi, tetapi lebih lambat.
 
 ## 6. Database
@@ -106,3 +108,12 @@ docs/                         BUSINESS_RULES, DATABASE_SCHEMA, TECHNICAL_ARCHITE
 | `docs/TECHNICAL_ARCHITECTURE.md` | Arsitektur, pilihan teknologi, responsivitas, milestone |
 | `docs/TEST_CASES.md` | Kasus uji dan hasil |
 | `docs/UAT_RESPONSIVE_CHECKLIST.md` | Checklist uji tampilan di Windows |
+
+## 7. Rilis / installer
+
+```powershell
+.\build-installer.ps1        # test → publish → Inno Setup → installer\Output\POSSalon-Setup-<versi>.exe
+```
+
+GitHub Actions membuat installer yang sama di setiap PR (artifact) dan membuat **GitHub Release** saat tag `v<versi>` di-push.
+Panduan lengkap (instal di PC kasir, upgrade, uninstall, membuat rilis): `docs/RELEASE.md`.

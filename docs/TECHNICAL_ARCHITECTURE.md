@@ -74,3 +74,4 @@ Target uji: 1280×720, 1366×768, 1920×1080 × skala 100/125/150%. Kombinasi te
 | M2 | Registrasi → Proses Treatment (antrian, mulai, ubah jasa/capster, selesai & bayar, backflush, batal), cetak nota 58 mm | Selesai |
 | M3 | Penjualan produk, pembelian, stock adjustment, kartu stok | Selesai |
 | M4 | Laporan (pendapatan, komisi, margin jasa, stok, rekap metode bayar) + export Excel/PDF | Selesai (M4a–M4d: 8 laporan + export, reset data transaksi & restore backup) |
+| Rilis | .NET 10 LTS, POSSalon.exe, backup sebelum upgrade, installer Inno Setup, GitHub Actions (`docs/RELEASE.md`) | Siap (v2.0.0) |

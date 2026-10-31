@@ -21,3 +21,7 @@ tests/TestResults/
 # OS
 Thumbs.db
 .DS_Store
+
+# Release output (dotnet publish / Inno Setup)
+publish/
+installer/Output/

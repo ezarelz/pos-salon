@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- SQLite persistence (Dapper), migrations, document numbering, backup and legacy import. -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>MSPASalon.Infrastructure</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>

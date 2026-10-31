@@ -2,10 +2,10 @@
   <!-- WPF shell: Views (XAML), converters, dialogs and composition root. Runs on Windows only. -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <RootNamespace>MSPASalon.Desktop</RootNamespace>
-    <AssemblyName>MSPASalon</AssemblyName>
+    <AssemblyName>POSSalon</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <!--

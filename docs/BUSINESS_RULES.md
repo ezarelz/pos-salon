@@ -1,4 +1,4 @@
-# MSPA Salon — Business Rules (v0.4)
+# POS Salon — Business Rules (v0.5)
 
 Dokumen ini adalah **sumber kebenaran** untuk aplikasi baru. Aplikasi lama hanya referensi.
 Penanda: **[KEPUTUSAN]** = sudah disepakati pengguna · **[ASUMSI]** = default sementara, perlu konfirmasi, diisolasi agar mudah diubah.
@@ -28,6 +28,21 @@ Penanda: **[KEPUTUSAN]** = sudah disepakati pengguna · **[ASUMSI]** = default s
 | K17 | Export laporan Excel/PDF tetap dibutuhkan (M4). | 2026-10-31 |
 | K18 | Asumsi A2, A3, A4, A6, A7 disetujui sebagai default (tidak dikoreksi pengguna). | 2026-10-31 |
 | K9 | Resep bahan diisi sebagai **pemakaian per 1 customer/jasa dalam satuan stok desimal**, mis. Cuci Rambut memakai Shampo **0,100 BTL**. | 2026-10-31 |
+| K20 | Diskon nota **tidak** memotong komisi capster; komisi = komisi master jasa saat treatment LUNAS (§11). | 2026-10-31 |
+| K21 | Laporan margin per jasa memakai nilai **bruto**; diskon nota dan neto hanya di baris total. Tidak ada alokasi diskon ke baris jasa. | 2026-10-31 |
+| K22 | **Kunjungan customer** = treatment LUNAS saja. Treatment BATAL dan penjualan produk tidak dihitung. | 2026-10-31 |
+| K23 | Status kunjungan: **Aktif** < 30 hari · **Perlu diingatkan** 30–60 hari · **Tidak aktif** > 60 hari sejak kunjungan terakhir; batas dapat diubah di Pengaturan Salon. | 2026-10-31 |
+| K24 | Penanda "terakhir datang X hari lalu" di layar Registrasi, **opsional** (aktif/nonaktif di Pengaturan Salon). | 2026-10-31 |
+| K25 | Pilihan cepat periode laporan komisi: 1–15, 16–akhir bulan, 1 bulan penuh, plus tanggal bebas. | 2026-10-31 |
+| R1 | Reset data transaksi: Admin memilih perlakuan stok setiap kali reset — (a) nolkan semua, atau (b) stok saat ini menjadi saldo awal (OPENING). | 2026-10-31 |
+| R2 | Reset **tidak** menghapus customer; customer uji coba dihapus manual lewat Master Customer (disarankan setelah reset). | 2026-10-31 |
+| R3 | Pengaman reset: pratinjau jumlah data, password ulang + ketik "RESET", backup otomatis wajib (gagal → batal), satu transaksi atomik, jejak audit permanen. | 2026-10-31 |
+| R4 | Ada transaksi lebih tua dari 14 hari → **peringatan keras**, reset tidak diblokir. | 2026-10-31 |
+| R5 | Menu **Restore dari Backup** dibuat bersama Reset (khusus ADMIN). | 2026-10-31 |
+| T1 | Migrasi 003 (M4a): snapshot biaya bahan per baris jasa, `cancelled_by` pada dokumen, tabel `audit_log`, indeks pendukung laporan. | 2026-10-31 |
+| T2 | Satu kerangka halaman laporan: filter periode, kartu ringkasan, tabel, tombol Cetak / Excel / PDF / Muat ulang. | 2026-10-31 |
+| T3 | Export **.xlsx** dibuat tanpa library tambahan (penulis xlsx internal). | 2026-10-31 |
+| T4 | **PDF lewat dialog cetak** dengan printer *Microsoft Print to PDF* terpilih otomatis bila tersedia (tampilan = cetak A4). | 2026-10-31 |
 
 ---
 
@@ -140,6 +155,7 @@ Stok on-hand = Σ ledger (masuk − keluar). Sumber: Pembelian (+), Penjualan (�
 ## 11. Komisi
 
 Komisi = nominal komisi jasa (snapshot saat posting Process) yang dikreditkan ke **capster final** baris tersebut. Process BATAL tidak menghasilkan komisi. Laporan komisi hanya membaca snapshot, bukan master.
+Diskon nota **tidak** mengurangi komisi (K20): capster tidak menentukan diskon.
 
 ## 12. Implikasi Akuntansi (referensi; aplikasi ini bukan GL)
 
@@ -176,3 +192,53 @@ Laporan **Total Pendapatan** = Penjualan POSTED + Process LUNAS. Registry **buka
 | A6 ✔ | Biaya = harga pokok master (standard cost) | Moving average dari pembelian |
 | A7 ✔ | Penjualan langsung ditolak bila stok kurang | Izinkan negatif |
 | A8 | Pembelian tidak mengubah harga pokok master | Update otomatis / moving average |
+
+## 14. Laporan (M4)
+
+**Aturan umum semua laporan**
+| Aturan | Ketentuan |
+|---|---|
+| L1 | Hanya dokumen terposting: treatment **LUNAS**, penjualan/pembelian/adjustment **POSTED**. Dokumen BATAL hanya muncul di Laporan Pembatalan. |
+| L2 | Tanggal laporan = **waktu posting** (konsisten dengan dashboard §13a). Periode inklusif: tanggal-dari 00:00 s/d tanggal-sampai 23:59:59. |
+| L3 | Nilai uang memakai **snapshot** di dokumen (harga, komisi, HPP, biaya bahan), bukan master saat laporan dibuka. |
+| L4 | Pembatalan susulan mengubah laporan periode lama (tidak ada penguncian periode); jejaknya ada di Laporan Pembatalan. |
+| L5 | Semua laporan dapat dicetak, diexport **.xlsx**, dan disimpan **.pdf** (T3, T4). |
+
+**Daftar laporan**
+| No | Laporan | Isi | Izin | Tahap |
+|---|---|---|---|---|
+| 1 | Rekap Kas Harian | Per metode bayar (jumlah transaksi, nominal tagihan), uang tunai seharusnya di laci, daftar nota (jam, no., customer, metode, total, referensi). Cetak 58 mm. | `report.view` | M4a |
+| 2 | Pendapatan | Per hari: client selesai, jasa bruto / diskon / neto, produk, total, rincian per metode bayar; rincian nota per hari. | `report.finance` | M4a |
+| 3 | Komisi Capster | Ringkasan per capster (client, jasa, nilai jasa, komisi) + rincian (tanggal, nota, customer, jasa, harga, komisi); slip per capster. Periode K25. | `report.commission` | M4a |
+| 4 | Jasa & Margin | Per jasa: frekuensi, nilai bruto, komisi, biaya bahan, margin Rp & %. Total: bruto, diskon nota, neto (K21). | `report.finance` | M4b |
+| 5 | Produk & Laba Kotor | Per produk: qty, penjualan bruto, diskon, HPP (snapshot), laba kotor, margin %. | `report.finance` | M4b |
+| 6 | Stok | Posisi & nilai stok per tanggal (harga pokok); mutasi per produk (awal, beli, jual, treatment, adjustment, akhir); pemakaian bahan per periode. | `report.view` | M4c |
+| 7 | Pembatalan | Dokumen BATAL: jenis, no., tanggal dokumen, waktu batal, user, alasan, nilai. | `report.audit` | M4c |
+| 8 | Kunjungan Customer | Per customer: no. HP, kunjungan terakhir, hari sejak, status (K23), total kunjungan, rata-rata jarak, total belanja, jasa & capster terakhir; riwayat per customer dari Master Customer. Customer walk-in tidak termasuk. | `report.customer` | M4c |
+
+**Biaya bahan per jasa (laporan 4).** Sejak migrasi 003: dari snapshot biaya bahan per baris jasa saat posting (resep × harga pokok saat itu). Transaksi sebelum migrasi 003: **estimasi** dari resep master saat laporan dibuka; laporan menandai baris estimasi.
+
+## 15. Hak Akses Laporan & Administrasi
+
+| Izin | Cakupan | ADMIN | KASIR (default) |
+|---|---|---|---|
+| `report.view` | Rekap Kas Harian, Stok, Kartu Stok | ✔ | ✔ |
+| `report.customer` | Kunjungan Customer & riwayat customer | ✔ | ✔ |
+| `report.finance` | Pendapatan, Jasa & Margin, Produk & Laba Kotor | ✔ | – |
+| `report.commission` | Komisi Capster | ✔ | – |
+| `report.audit` | Pembatalan | ✔ | – |
+| (khusus role ADMIN) | Reset Data Transaksi, Restore Backup — **tidak dapat diberikan ke role lain** | ✔ | – |
+
+Izin baru otomatis dimiliki role ADMIN; role lain mengikuti centang di menu Role & Hak Akses.
+
+## 16. Reset Data Transaksi & Restore (M4d)
+
+**Tujuan:** membersihkan transaksi uji coba sebelum go-live / toko atau kasir baru. **Bukan** untuk data operasional (catatan keuangan).
+
+| Dihapus | Dipertahankan |
+|---|---|
+| Registrasi, treatment, penjualan, pembelian, stock adjustment (header & baris), pembayaran, stock ledger, counter penomoran (nota berikutnya `…/0001`) | Semua master (termasuk **customer**, R2), user & role, pengaturan salon & logo, `audit_log` |
+
+Alur: pratinjau jumlah data & rentang tanggal → peringatan bila ada transaksi > 14 hari (R4) → pilih perlakuan stok (R1) → password ulang + ketik "RESET" → backup otomatis → hapus dalam satu transaksi → stok dihitung ulang → catat di `audit_log` → VACUUM.
+
+**Restore:** pilih file backup → validasi (file database aplikasi ini, versi skema ≤ versi aplikasi) → backup otomatis database saat ini → ganti database → aplikasi meminta restart; migrasi yang belum ada diterapkan saat dibuka.

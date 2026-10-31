@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.0.0 (rilis) — 2026-10-31 (.NET 10 LTS)
+
+Persiapan rilis pertama. Fungsi aplikasi tidak berubah dari M4d.
+
+- **.NET 10 LTS** (didukung sampai Nov 2028; .NET 8 berakhir 10 Nov 2026). Microsoft.Data.Sqlite 10.0.14. `global.json` mengunci SDK 10.0.x.
+- File aplikasi kini **POSSalon.exe** (folder data tetap `%LOCALAPPDATA%\MSPASalon`, database lama langsung terbaca).
+- **Backup otomatis sebelum upgrade**: bila versi baru mengubah struktur database, database lama dibackup dulu
+  (`backup\…_sebelum-upgrade-vN.db`); bila backup gagal, pembaruan dibatalkan dan database tidak diubah.
+- Semua backup kini **satu file mandiri** (tanpa file pendamping `-wal`/`-shm`).
+- **Installer** Inno Setup (`POSSalon-Setup-<versi>.exe`): per-machine di Program Files, memeriksa .NET 10 Desktop Runtime,
+  upgrade di tempat, tidak menyentuh data. Skrip `build-installer.ps1`. Panduan: `docs/RELEASE.md`.
+- **GitHub Actions**: setiap PR/push ke `main` mem-build seluruh solution termasuk WPF di Windows + membuat installer;
+  tag `v<versi>` membuat GitHub Release.
+
+**Verifikasi di sandbox (Linux, SDK 10.0.114):** 92/92 test lolos di runtime .NET 10, 0 warning; tool import ikut terbangun.
+Build WPF, publish, dan installer **belum** terverifikasi di sini — diverifikasi oleh GitHub Actions (Windows) dan uji di laptop.
+
 ## M4d — 2026-10-31 (.NET 8)
 
 Alat go-live sesuai BUSINESS_RULES v0.7 §16 (R1–R5, D1–D5). Khusus role **ADMIN**. Tidak ada migrasi database baru.

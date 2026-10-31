@@ -1,5 +1,5 @@
 ; =====================================================================================================
-; POS Salon — Inno Setup script (Inno Setup 6.x)
+; POS Salon — Inno Setup script (Inno Setup 6.3+ / 7.x)
 ; Build:  .\build-installer.ps1            (tests → dotnet publish → this script)
 ;    or:  ISCC.exe /DMyAppVersion=2.0.0 installer\POSSalon.iss   (after dotnet publish -p:PublishProfile=win-x64)
 ;
@@ -9,12 +9,19 @@
 ; uninstall only manage program files. The app itself backs up the database before a schema upgrade.
 ; =====================================================================================================
 
-#ifndef MyAppVersion
-  #define MyAppVersion "0.0.0"
-#endif
 #define MyAppName "POS Salon"
 #define MyAppExe "POSSalon.exe"
 #define PublishDir "..\publish\win-x64"
+; Version: passed by build-installer.ps1 (/DMyAppVersion=x.y.z). When compiled from the Inno Setup IDE (Build → Compile),
+; it is read from the published POSSalon.exe (x.y.z.0) — run `dotnet publish ... -p:PublishProfile=win-x64` first.
+#ifndef MyAppVersion
+  #define ExePath AddBackslash(SourcePath) + PublishDir + "\" + MyAppExe
+  #if FileExists(ExePath)
+    #define MyAppVersion GetVersionNumbersString(ExePath)
+  #else
+    #define MyAppVersion "0.0.0"
+  #endif
+#endif
 #define RuntimeUrl "https://dotnet.microsoft.com/download/dotnet/10.0"
 
 [Setup]

@@ -42,7 +42,9 @@ Login ADMIN → **Pengaturan → Reset Data Transaksi** untuk menghapus transaks
 ## B. Untuk developer (membuat rilis)
 
 ### 1. Prasyarat
-.NET 10 SDK (lihat `global.json`), Inno Setup 6 (`winget install JRSoftware.InnoSetup`).
+.NET 10 SDK (lihat `global.json`), Inno Setup 6.3+ atau 7.x (`winget install JRSoftware.InnoSetup`). Skrip mencari ISCC.exe di folder
+`Inno Setup *` terbaru; bila di lokasi lain: `$env:ISCC = "C:\...\ISCC.exe"`. Alternatif tanpa skrip: setelah `dotnet publish`, buka
+`installer\POSSalon.iss` di Inno Setup → **Build → Compile** (versi diambil dari POSSalon.exe).
 
 ### 2. Membuat installer di laptop
 ```powershell

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MSPASalon.Core.Domain;
+using MSPASalon.Core.Reports;
 using MSPASalon.Core.Entities;
 using MSPASalon.Presentation.Layout;
 using MSPASalon.Presentation.Services;
@@ -127,7 +128,11 @@ public sealed class ShellViewModel : ViewModelBase
             new("Laporan", "Rekap Kas Harian", "report:cash", "\uE8C7", Permissions.ReportView),
             new("Laporan", "Pendapatan", "report:revenue", "\uE9D2", Permissions.ReportFinance),
             new("Laporan", "Komisi Capster", "report:commission", "\uE716", Permissions.ReportCommission),
-            new("Laporan", "Laporan Lainnya", "report:more", "\uE7C3", Permissions.ReportView, "M4b/M4c"),
+            new("Laporan", "Jasa & Margin", "report:servicemargin", "\uE8EF", Permissions.ReportFinance),
+            new("Laporan", "Produk & Laba Kotor", "report:productprofit", "\uE7B8", Permissions.ReportFinance),
+            new("Laporan", "Laporan Stok", "report:stock", "\uE7C3", Permissions.ReportView),
+            new("Laporan", "Kunjungan Customer", "report:customervisit", "\uE77B", Permissions.ReportCustomer),
+            new("Laporan", "Pembatalan", "report:cancellation", "\uE711", Permissions.ReportAudit),
 
             new("Pengaturan", "Pengaturan Salon", "settings:branch", "", Permissions.SettingsBranch),
             new("Pengaturan", "User", "master:user", "", Permissions.MasterUser),
@@ -162,9 +167,7 @@ public sealed class ShellViewModel : ViewModelBase
     {
         if (item.IsComingSoon)
             return new ComingSoonViewModel(item.Key, item.Title, item.Milestone!,
-                item.Key == "report:more"
-                    ? "Jasa & Margin dan Produk & Laba Kotor (M4b); Stok, Pembatalan, dan Kunjungan Customer (M4c). Spesifikasinya sudah disetujui di BUSINESS_RULES.md §14."
-                    : "Modul ini dijadwalkan pada milestone berikutnya. Aturan bisnisnya sudah ditetapkan di BUSINESS_RULES.md dan struktur databasenya sudah tersedia.");
+                "Modul ini dijadwalkan pada milestone berikutnya. Aturan bisnisnya sudah ditetapkan di BUSINESS_RULES.md dan struktur databasenya sudah tersedia.");
 
         bool Can(string p) => Session.Can(p);
         var d = _dialogs;
@@ -176,15 +179,20 @@ public sealed class ShellViewModel : ViewModelBase
             "report:cash" => new Reports.CashDailyReportViewModel(_s, d, Session),
             "report:revenue" => new Reports.RevenueReportViewModel(_s, d, Session),
             "report:commission" => new Reports.CommissionReportViewModel(_s, d, Session),
+            "report:servicemargin" => new Reports.ServiceMarginReportViewModel(_s, d, Session),
+            "report:productprofit" => new Reports.ProductProfitReportViewModel(_s, d, Session),
+            "report:stock" => new Reports.StockReportViewModel(_s, d, Session),
+            "report:cancellation" => new Reports.CancellationReportViewModel(_s, d, Session),
+            "report:customervisit" => new Reports.CustomerVisitReportViewModel(_s, d, Session),
 
-            "master:customer" => new ListPageViewModel<Customer>(item.Key, item.Title,
+            "master:customer" => WithVisitHistory(new ListPageViewModel<Customer>(item.Key, item.Title,
                 [
                     new("Kode", nameof(Customer.Code), MinWidth: 90), new("Nama", nameof(Customer.Name), Star: true, MinWidth: 160),
                     new("No. HP", nameof(Customer.Phone), MinWidth: 110), new("Member", nameof(Customer.IsMember), ColumnKind.Bool, 70),
                     new("Walk-in", nameof(Customer.IsWalkIn), ColumnKind.Bool, 70), new("Aktif", nameof(Customer.IsActive), ColumnKind.Bool, 60),
                 ], d, _s.Customers.GetAll, x => new CustomerEditorViewModel(_s.Customers, x),
                 x => _s.Customers.Delete(x.Id), x => $"{x.Code} {x.Name} {x.Phone}", x => x.Name,
-                Can(Permissions.MasterCustomer)),
+                Can(Permissions.MasterCustomer))),
 
             "master:product" => new ListPageViewModel<Product>(item.Key, item.Title,
                 [
@@ -323,6 +331,20 @@ public sealed class ShellViewModel : ViewModelBase
         var process = new RelayCommand(() => { if (page.Selected is { } r) OpenTreatment(r.Id); },
             () => page.Selected is { Status: RegistrationStatus.Waiting or RegistrationStatus.InProcess } && Session.Can(Permissions.TransTreatment));
         page.Extra.Add(new ActionItem("Proses Treatment", process));
+        return page;
+    }
+
+    /// <summary>Master Customer → "Riwayat Kunjungan" (report.customer, §14 no. 8).</summary>
+    private ListPageViewModel<Customer> WithVisitHistory(ListPageViewModel<Customer> page)
+    {
+        if (!Session.Can(Permissions.ReportCustomer)) return page;
+        var history = new RelayCommand(() =>
+        {
+            if (page.Selected is not { } c) return;
+            var lines = ReportBuilders.VisitHistoryText(c, _s.Reports.GetVisitHistory(c.Id), _s.Branch.GetVisitSettings(), _s.Clock.Now);
+            _dialogs.ShowEditor(new DocumentDetailViewModel($"Riwayat Kunjungan — {c.Name}", lines, null));
+        }, () => page.Selected is { IsWalkIn: false });
+        page.Extra.Add(new ActionItem("Riwayat Kunjungan", history));
         return page;
     }
 

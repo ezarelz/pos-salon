@@ -146,7 +146,7 @@ public sealed class ViewModelTests : IDisposable
         Assert.Contains("ERROR: Customer Walk-in terakhir", dialogs.Messages.Last());
     }
 
-    [Test("VM-04", "Shell: menu sesuai hak akses KASIR, tab tidak dobel, laporan (M4) tampil 'segera', nav ringkas di layar sempit")]
+    [Test("VM-04", "Shell: menu sesuai hak akses KASIR, tab tidak dobel, laporan kas terbuka, nav ringkas di layar sempit")]
     public void ShellNavigation()
     {
         var cashierRole = _db.App.Roles.GetAll().Single(r => r.Code == RoleCodes.Cashier).Id;
@@ -167,8 +167,8 @@ public sealed class ViewModelTests : IDisposable
         shell.Navigate(shell.NavItems.Single(n => n.Key == "trans:treatment"));
         Assert.True(shell.SelectedPage is MSPASalon.Presentation.ViewModels.Transactions.TreatmentPageViewModel, "M2 treatment page");
         shell.ClosePageCommand.Execute(shell.SelectedPage);
-        shell.Navigate(shell.NavItems.Single(n => n.Key == "report:more"));
-        Assert.True(shell.SelectedPage is ComingSoonViewModel, "M4 placeholder");
+        shell.Navigate(shell.NavItems.Single(n => n.Key == "report:cash"));
+        Assert.True(shell.SelectedPage is MSPASalon.Presentation.ViewModels.Reports.CashDailyReportViewModel, "M4 cash report");
         shell.ClosePageCommand.Execute(shell.SelectedPage);
         Assert.Equal(2, shell.OpenPages.Count);
         Assert.False(keys.Contains("trans:purchase"), "kasir cannot purchase");

@@ -160,6 +160,8 @@ public sealed class BranchSettingsViewModel : PageViewModel
     private string? _address, _phone, _footer, _status;
     private int _paperWidthMm = 58;
     private byte[]? _logo;
+    private string _visitActiveText = "30", _visitInactiveText = "60";
+    private bool _showLastVisit = true;
 
     public BranchSettingsViewModel(IBranchService branch, IDialogService dialogs)
     {
@@ -180,6 +182,12 @@ public sealed class BranchSettingsViewModel : PageViewModel
     public string? Phone { get => _phone; set => SetProperty(ref _phone, value); }
     public string? ReceiptFooter { get => _footer; set => SetProperty(ref _footer, value); }
     public int PaperWidthMm { get => _paperWidthMm; set => SetProperty(ref _paperWidthMm, value); }
+    /// <summary>K23: customer is "Aktif" below this many days since the last visit.</summary>
+    public string VisitActiveText { get => _visitActiveText; set => SetProperty(ref _visitActiveText, value); }
+    /// <summary>K23: customer is "Tidak aktif" above this many days.</summary>
+    public string VisitInactiveText { get => _visitInactiveText; set => SetProperty(ref _visitInactiveText, value); }
+    /// <summary>K24: show "terakhir datang …" on the registration screen.</summary>
+    public bool ShowLastVisit { get => _showLastVisit; set => SetProperty(ref _showLastVisit, value); }
     public string? StatusText { get => _status; private set => SetProperty(ref _status, value); }
     public RelayCommand SaveCommand { get; }
     public RelayCommand ChooseLogoCommand { get; }
@@ -229,12 +237,17 @@ public sealed class BranchSettingsViewModel : PageViewModel
         ShortName = b.ShortName; Name = b.Name; Address = b.Address; Phone = b.Phone;
         ReceiptFooter = b.ReceiptFooter; PaperWidthMm = b.PaperWidthMm; StatusText = null;
         Logo = _branch.GetLogo();
+        var v = _branch.GetVisitSettings();
+        VisitActiveText = v.ActiveDays.ToString(); VisitInactiveText = v.InactiveDays.ToString(); ShowLastVisit = v.ShowLastVisitOnRegistration;
     }
 
     private void Save()
     {
         try
         {
+            if (!int.TryParse(VisitActiveText?.Trim(), out var active) || !int.TryParse(VisitInactiveText?.Trim(), out var inactive))
+                throw new BusinessException("Batas hari kunjungan harus berupa angka bulat.");
+            _branch.SaveVisitSettings(new MSPASalon.Core.Reports.VisitSettings(active, inactive, ShowLastVisit));
             _branch.Save(new Branch
             {
                 ShortName = ShortName, Name = Name, Address = Address, Phone = Phone,

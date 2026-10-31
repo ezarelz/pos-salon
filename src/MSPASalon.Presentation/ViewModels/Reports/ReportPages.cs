@@ -312,3 +312,96 @@ public sealed class CommissionReportViewModel : ReportPageViewModel
     protected override ReportDocument BuildDocument(DateTime from, DateTime to) =>
         ReportBuilders.Commission(S.Reports.GetCommission(from, to, FilterValue == 0 ? null : FilterValue), SalonName, UserName, S.Clock.Now);
 }
+
+/// <summary>Laporan 4 — Jasa & Margin (§14, K21).</summary>
+public sealed class ServiceMarginReportViewModel : ReportPageViewModel
+{
+    public ServiceMarginReportViewModel(PresentationServices s, IDialogService dialogs, UserSession session)
+        : base(s, dialogs, session, ReportPeriods.General, PeriodPreset.ThisMonth) => Activate();
+
+    public override string Title => "Jasa & Margin";
+    public override string Key => "report:servicemargin";
+
+    protected override ReportDocument BuildDocument(DateTime from, DateTime to) =>
+        ReportBuilders.ServiceMargin(S.Reports.GetServiceMargin(from, to), SalonName, UserName, S.Clock.Now);
+}
+
+/// <summary>Laporan 5 — Produk & Laba Kotor (§14).</summary>
+public sealed class ProductProfitReportViewModel : ReportPageViewModel
+{
+    public ProductProfitReportViewModel(PresentationServices s, IDialogService dialogs, UserSession session)
+        : base(s, dialogs, session, ReportPeriods.General, PeriodPreset.ThisMonth) => Activate();
+
+    public override string Title => "Produk & Laba Kotor";
+    public override string Key => "report:productprofit";
+
+    protected override ReportDocument BuildDocument(DateTime from, DateTime to) =>
+        ReportBuilders.ProductProfit(S.Reports.GetProductProfit(from, to), SalonName, UserName, S.Clock.Now);
+}
+
+/// <summary>Laporan 6 — Stok: mutation and position at the end date, material usage (§14).</summary>
+public sealed class StockReportViewModel : ReportPageViewModel
+{
+    public StockReportViewModel(PresentationServices s, IDialogService dialogs, UserSession session)
+        : base(s, dialogs, session, ReportPeriods.General, PeriodPreset.ThisMonth)
+    {
+        FilterOptions =
+        [
+            new Option<long>(ReportBuilders.StockAll, "Semua produk"),
+            new Option<long>(ReportBuilders.StockConsumable, "Bahan habis pakai"),
+            new Option<long>(ReportBuilders.StockSellable, "Produk dijual"),
+            new Option<long>(ReportBuilders.StockBelowMin, "Di bawah minimum"),
+        ];
+        Activate();
+    }
+
+    public override string Title => "Laporan Stok";
+    public override string Key => "report:stock";
+    public override string? FilterLabel => "Tampilkan";
+
+    protected override ReportDocument BuildDocument(DateTime from, DateTime to) =>
+        ReportBuilders.Stock(S.Reports.GetStock(from, to), FilterValue, SalonName, UserName, S.Clock.Now);
+}
+
+/// <summary>Laporan 7 — Pembatalan (§14, audit).</summary>
+public sealed class CancellationReportViewModel : ReportPageViewModel
+{
+    public CancellationReportViewModel(PresentationServices s, IDialogService dialogs, UserSession session)
+        : base(s, dialogs, session, ReportPeriods.General, PeriodPreset.ThisMonth) => Activate();
+
+    public override string Title => "Laporan Pembatalan";
+    public override string Key => "report:cancellation";
+
+    protected override ReportDocument BuildDocument(DateTime from, DateTime to) =>
+        ReportBuilders.Cancellations(S.Reports.GetCancellations(from, to), SalonName, UserName, S.Clock.Now);
+}
+
+/// <summary>Laporan 8 — Kunjungan Customer, as of one date (K22, K23). Filter by status.</summary>
+public sealed class CustomerVisitReportViewModel : ReportPageViewModel
+{
+    public CustomerVisitReportViewModel(PresentationServices s, IDialogService dialogs, UserSession session)
+        : base(s, dialogs, session, [PeriodPreset.Today, PeriodPreset.Custom], PeriodPreset.Today)
+    {
+        FilterOptions =
+        [
+            new Option<long>(ReportBuilders.VisitRemind, VisitStatus.Remind),
+            new Option<long>(ReportBuilders.VisitInactive, VisitStatus.Inactive),
+            new Option<long>(ReportBuilders.VisitActive, VisitStatus.Active),
+            new Option<long>(ReportBuilders.VisitNever, VisitStatus.Never),
+            new Option<long>(ReportBuilders.VisitAll, "Semua customer"),
+        ];
+        Activate();
+    }
+
+    public override string Title => "Kunjungan Customer";
+    public override string Key => "report:customervisit";
+    public override bool IsSingleDay => true;
+    public override string? FilterLabel => "Status";
+
+    protected override ReportDocument BuildDocument(DateTime from, DateTime to)
+    {
+        var settings = S.Branch.GetVisitSettings();
+        return ReportBuilders.CustomerVisits(S.Reports.GetCustomerVisits(from, settings.ActiveDays, settings.InactiveDays),
+            FilterValue, SalonName, UserName, S.Clock.Now);
+    }
+}

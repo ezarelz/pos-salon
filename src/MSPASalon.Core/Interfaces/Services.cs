@@ -56,6 +56,9 @@ public interface IBranchService
     byte[]? GetLogo();
     /// <summary>Sets (PNG/JPEG/BMP, max 1 MB) or removes (null) the receipt logo.</summary>
     void SaveLogo(byte[]? image);
+    MSPASalon.Core.Reports.VisitSettings GetVisitSettings();
+    /// <summary>Validates 1 ≤ ActiveDays &lt; InactiveDays ≤ 3650 (K23).</summary>
+    void SaveVisitSettings(MSPASalon.Core.Reports.VisitSettings settings);
 }
 
 public interface IBackupService
@@ -122,6 +125,14 @@ public interface IReportService
     MSPASalon.Core.Reports.RevenueReport GetRevenue(DateTime from, DateTime to);
     /// <param name="employeeId">null = all capsters.</param>
     MSPASalon.Core.Reports.CommissionReport GetCommission(DateTime from, DateTime to, long? employeeId);
+    MSPASalon.Core.Reports.ServiceMarginReport GetServiceMargin(DateTime from, DateTime to);
+    MSPASalon.Core.Reports.ProductProfitReport GetProductProfit(DateTime from, DateTime to);
+    MSPASalon.Core.Reports.StockReport GetStock(DateTime from, DateTime to);
+    MSPASalon.Core.Reports.CancellationReport GetCancellations(DateTime from, DateTime to);
+    /// <summary>Visits (treatments LUNAS, K22) up to and including <paramref name="asOf"/>; active, non walk-in customers.</summary>
+    MSPASalon.Core.Reports.CustomerVisitReport GetCustomerVisits(DateTime asOf, int activeDays, int inactiveDays);
+    IReadOnlyList<MSPASalon.Core.Reports.VisitHistoryRow> GetVisitHistory(long customerId);
+    MSPASalon.Core.Reports.LastVisitInfo? GetLastVisit(long customerId, DateTime asOf);
 }
 
 /// <summary>Writes a report to an Excel workbook (.xlsx).</summary>

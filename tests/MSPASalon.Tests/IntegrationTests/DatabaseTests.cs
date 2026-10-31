@@ -13,7 +13,7 @@ public sealed class DatabaseTests : IDisposable
     private readonly TestDatabase _db = new();
     public void Dispose() => _db.Dispose();
 
-    [Test("INT-01", "Migrasi: skema terbaru (v3) terbentuk, upgrade database v1 → v3, idempotent, foreign_keys ON, WAL")]
+    [Test("INT-01", "Migrasi: skema terbaru (v3) terbentuk, upgrade database v1 → v3 dengan backup otomatis sebelumnya, idempotent, foreign_keys ON, WAL")]
     public void MigrationCreatesSchema()
     {
         var init = new DatabaseInitializer(_db.App.Db, _db.Clock);
@@ -33,6 +33,18 @@ public sealed class DatabaseTests : IDisposable
         }
         var upgraded = new Infrastructure.AppServices(oldPath, _db.Clock);
         Assert.Equal(3, new DatabaseInitializer(upgraded.Db, _db.Clock).CurrentVersion(), "v1 → v3");
+        // Automatic backup of the v1 database before the upgrade (rilis); a fresh database is not backed up.
+        var backups = Directory.GetFiles(Path.Combine(_db.Directory, "backup"), "*_sebelum-upgrade-v1.db");
+        Assert.Equal(1, backups.Length, "backup before upgrade");
+        using (var b = new SqliteConnection($"Data Source={backups[0]};Mode=ReadOnly;Pooling=False"))
+        {
+            b.Open();
+            Assert.Equal(1L, b.ExecuteScalar<long>("SELECT MAX(version) FROM schema_version"), "backup is the untouched v1 database");
+            Assert.Equal("Salon Lama", b.ExecuteScalar<string>("SELECT name FROM branch WHERE id = 1"));
+            Assert.Equal("delete", b.ExecuteScalar<string>("PRAGMA journal_mode"), "rollback journal, not WAL");
+        }
+        _ = new Infrastructure.AppServices(oldPath, _db.Clock);   // second start: nothing pending → no new backup
+        Assert.Equal(1, Directory.GetFiles(Path.Combine(_db.Directory, "backup")).Length, "single self-contained file, no -wal/-shm, no second backup");
         Assert.Equal("Salon Lama", upgraded.Branch.Get().Name, "branch data kept");
         Assert.True(upgraded.Branch.GetLogo() is null);
         using (var u = upgraded.Db.Open())

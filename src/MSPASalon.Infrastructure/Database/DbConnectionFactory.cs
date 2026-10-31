@@ -50,6 +50,17 @@ public sealed class DbConnectionFactory
     /// write lock up-front or fails before doing any work. Use for every multi-table operation.
     /// </summary>
     public static SqliteTransaction BeginWrite(SqliteConnection connection) => connection.BeginTransaction(deferred: false);
+
+    /// <summary>
+    /// A backup copied from the live (WAL) database inherits WAL mode, which creates -wal/-shm side files whenever
+    /// it is opened. Switching it to a rollback journal makes the backup ONE self-contained file that can be copied safely.
+    /// </summary>
+    public static void MakeSelfContained(SqliteConnection backupConnection)
+    {
+        using var cmd = backupConnection.CreateCommand();
+        cmd.CommandText = "PRAGMA journal_mode = DELETE;";
+        cmd.ExecuteNonQuery();
+    }
 }
 
 /// <summary>Date/time storage format: TEXT 'yyyy-MM-dd HH:mm:ss' (local time, sortable).</summary>

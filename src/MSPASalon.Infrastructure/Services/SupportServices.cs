@@ -99,6 +99,7 @@ public sealed class BackupService(DbConnectionFactory db, IClock clock) : IBacku
         {
             target.Open();
             source.BackupDatabase(target);
+            DbConnectionFactory.MakeSelfContained(target);
         }
         return file;
     }

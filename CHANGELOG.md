@@ -14,8 +14,12 @@ Persiapan rilis pertama. Fungsi aplikasi tidak berubah dari M4d.
 - **GitHub Actions**: setiap PR/push ke `main` mem-build seluruh solution termasuk WPF di Windows + membuat installer;
   tag `v<versi>` membuat GitHub Release.
 
-**Verifikasi di sandbox (Linux, SDK 10.0.114):** 92/92 test lolos di runtime .NET 10, 0 warning; tool import ikut terbangun.
-Build WPF, publish, dan installer **belum** terverifikasi di sini — diverifikasi oleh GitHub Actions (Windows) dan uji di laptop.
+**Verifikasi:**
+- Sandbox (Linux, SDK 10.0.114): 92/92 test lolos di runtime .NET 10, 0 warning; tool import ikut terbangun.
+- GitHub Actions (windows-latest): 92/92 test lolos di Windows, **build seluruh solution termasuk WPF tanpa warning**, publish, dan
+  installer `POSSalon-Setup-2.0.0.exe` berhasil dibuat (artifact). Run pertama menemukan satu masalah khusus Windows (file backup
+  terkunci saat dicek → restore gagal bila file terbuka di program lain); sudah diperbaiki.
+- Belum: uji pasang/upgrade/uninstall di PC Windows (UAT F-60..F-65).
 
 ## M4d — 2026-10-31 (.NET 8)
 

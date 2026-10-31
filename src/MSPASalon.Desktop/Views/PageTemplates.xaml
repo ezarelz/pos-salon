@@ -654,6 +654,139 @@
         </Grid>
     </DataTemplate>
 
+
+    <!-- ================================================================== administration (M4d, ADMIN only) -->
+    <DataTemplate x:Key="ResetDataTemplate">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                <StackPanel Margin="20,16" MaxWidth="820" HorizontalAlignment="Left">
+                    <TextBlock Text="Reset Data Transaksi" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource HintText}" Margin="0,4,0,12"
+                               Text="Untuk membersihkan transaksi uji coba sebelum toko mulai beroperasi. Master (produk, jasa &amp; resep, karyawan, supplier, metode bayar), customer, user, dan pengaturan TIDAK dihapus. Bukan untuk data operasional." />
+
+                    <Border Style="{StaticResource ErrorBox}" Margin="0,0,0,12"
+                            Visibility="{Binding IsOperationalWarning, Converter={x:Static conv:Conv.BoolToVisibility}}">
+                        <TextBlock Text="{Binding OperationalWarning}" Foreground="{DynamicResource DangerBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE72C;" Command="{Binding RefreshCommand}" ToolTip="Muat ulang" />
+                                <TextBlock Text="Yang akan dihapus" Style="{StaticResource SectionTitle}" />
+                            </DockPanel>
+                            <ItemsControl ItemsSource="{Binding CountRows}" Focusable="False">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Value}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Label}" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="{Binding PeriodText}" Style="{StaticResource HintText}" Margin="0,6,0,0" />
+                            <TextBlock Style="{StaticResource HintText}" Text="Nomor nota berikutnya kembali ke …/0001. Jejak audit (audit_log) tidak dihapus." />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Stok setelah reset" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{Binding StockText}" Style="{StaticResource HintText}" Margin="0,0,0,6" />
+                            <RadioButton GroupName="ResetStock" IsChecked="{Binding ZeroStock}" Margin="0,2" Foreground="{DynamicResource TextBrush}"
+                                         Content="Nolkan semua stok (saldo awal diinput lagi lewat Pembelian / Stock Adjustment)" />
+                            <RadioButton GroupName="ResetStock" IsChecked="{Binding KeepStock}" Margin="0,2" Foreground="{DynamicResource TextBrush}"
+                                         Content="Pertahankan stok saat ini sebagai saldo awal (bila stok fisik sudah dicocokkan)" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Konfirmasi" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Folder backup otomatis (wajib, dibuat sebelum menghapus)" Style="{StaticResource FieldLabel}" />
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right" Content="Ganti…" Command="{Binding ChangeFolderCommand}" Margin="8,0,0,0" />
+                                <TextBox Text="{Binding BackupDirectory, Mode=OneWay}" IsReadOnly="True" />
+                            </DockPanel>
+                            <c:FormPanel ColumnMinWidth="220" MaxColumns="2">
+                                <StackPanel>
+                                    <TextBlock Text="Password Anda (ADMIN)" Style="{StaticResource FieldLabel}" />
+                                    <PasswordBox c:PasswordBoxAssistant.BoundPassword="{Binding Password, Mode=TwoWay}" />
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource FieldLabel}"><Run Text="Ketik " /><Run Text="{Binding ConfirmWord, Mode=OneWay}" FontWeight="Bold" /><Run Text=" untuk konfirmasi" /></TextBlock>
+                                    <TextBox Text="{Binding ConfirmText, UpdateSourceTrigger=PropertyChanged}" CharacterCasing="Normal" />
+                                </StackPanel>
+                            </c:FormPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="20,10">
+                <DockPanel LastChildFill="True">
+                    <Button DockPanel.Dock="Right" Content="Reset Data Transaksi" Command="{Binding ResetCommand}" Style="{StaticResource DangerButton}" MinWidth="170" />
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                        <TextBlock Text="{Binding ErrorText}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap"
+                                   Visibility="{Binding HasError, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                        <TextBlock Text="{Binding ResultText}" Foreground="{DynamicResource SuccessBrush}" TextWrapping="Wrap"
+                                   Visibility="{Binding ResultText, Converter={x:Static conv:Conv.HasValueToVisibility}}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="RestoreTemplate">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                <StackPanel Margin="20,16" MaxWidth="820" HorizontalAlignment="Left">
+                    <TextBlock Text="Restore Backup" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource HintText}" Margin="0,4,0,12"
+                               Text="Mengganti seluruh isi database dengan file backup (mis. dari menu Backup Database atau backup otomatis sebelum reset). Database saat ini dibackup dulu secara otomatis. Setelah restore, aplikasi meminta login ulang." />
+                    <Button Content="Pilih File Backup…" Command="{Binding ChooseFileCommand}" HorizontalAlignment="Left" Margin="0,0,0,12" />
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12" Visibility="{Binding HasInfo, Converter={x:Static conv:Conv.BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="Isi file backup" Style="{StaticResource SectionTitle}" />
+                            <ItemsControl ItemsSource="{Binding InfoRows}" Focusable="False">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}" Foreground="{DynamicResource MutedTextBrush}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="Password Anda (ADMIN)" Style="{StaticResource FieldLabel}" Margin="0,12,0,4" />
+                            <PasswordBox c:PasswordBoxAssistant.BoundPassword="{Binding Password, Mode=TwoWay}" MaxWidth="320" HorizontalAlignment="Left" MinWidth="240" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Style="{StaticResource HintText}"><Run Text="Backup otomatis database saat ini disimpan di: " /><Run Text="{Binding SafetyFolder, Mode=OneWay}" /></TextBlock>
+                </StackPanel>
+            </ScrollViewer>
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="20,10">
+                <DockPanel LastChildFill="True">
+                    <Button DockPanel.Dock="Right" Content="Restore" Command="{Binding RestoreCommand}" Style="{StaticResource DangerButton}" MinWidth="130" />
+                    <TextBlock Text="{Binding ErrorText}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0"
+                               Visibility="{Binding HasError, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
     <v:PageTemplateSelector x:Key="PageSelector"
                             ListTemplate="{StaticResource ListPageTemplate}"
                             DashboardTemplate="{StaticResource DashboardTemplate}"
@@ -661,5 +794,7 @@
                             ComingSoonTemplate="{StaticResource ComingSoonTemplate}"
                             TreatmentTemplate="{StaticResource TreatmentTemplate}"
                             StockCardTemplate="{StaticResource StockCardTemplate}"
-                            ReportTemplate="{StaticResource ReportTemplate}" />
+                            ReportTemplate="{StaticResource ReportTemplate}"
+                            ResetDataTemplate="{StaticResource ResetDataTemplate}"
+                            RestoreTemplate="{StaticResource RestoreTemplate}" />
 </ResourceDictionary>

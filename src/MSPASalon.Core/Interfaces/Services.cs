@@ -63,8 +63,9 @@ public interface IBranchService
 
 public interface IBackupService
 {
-    /// <summary>Creates a consistent online backup and returns the full path of the backup file.</summary>
-    string Backup(string targetDirectory);
+    /// <summary>Creates a consistent online backup and returns the full path of the backup file.
+    /// <paramref name="label"/> is appended to the file name (e.g. "sebelum-reset").</summary>
+    string Backup(string targetDirectory, string? label = null);
     string DatabasePath { get; }
 }
 
@@ -139,4 +140,21 @@ public interface IReportService
 public interface IReportExporter
 {
     void ToXlsx(MSPASalon.Core.Reports.ReportDocument document, string path);
+}
+
+/// <summary>
+/// Go-live tools, ADMIN role only (BUSINESS_RULES §16): reset transaction data and restore a backup.
+/// Every call re-checks the role and the admin password against the database; both are logged in audit_log.
+/// </summary>
+public interface IAdministrationService
+{
+    /// <summary>Default folder for automatic backups: "backup" next to the database file.</summary>
+    string DefaultBackupDirectory { get; }
+    ResetPreview PreviewReset();
+    /// <summary>Backup (mandatory, R3) → delete all transaction data in one transaction → stock per R1 → audit → VACUUM.</summary>
+    ResetResult ResetTransactions(UserSession session, string password, string confirmText, StockResetMode mode, string backupDirectory);
+    /// <summary>Validates a backup file (SQLite, this application's schema, not newer than the app, integrity ok).</summary>
+    BackupInfo InspectBackup(string path);
+    /// <summary>Backs up the current database, then replaces its contents with the backup and applies pending migrations.</summary>
+    RestoreResult Restore(UserSession session, string password, string backupPath, string safetyBackupDirectory);
 }

@@ -44,7 +44,8 @@ public sealed record PresentationServices(
     IPrintService Print,
     IThemeService Theme,
     IReportService Reports,
-    IReportExporter ReportExporter);
+    IReportExporter ReportExporter,
+    IAdministrationService Administration);
 
 /// <summary>Light/dark appearance. The choice is per computer (not per user) and survives restarts.</summary>
 public interface IThemeService

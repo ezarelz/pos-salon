@@ -32,6 +32,12 @@ public static class Permissions
     public const string AdminBackup = "admin.backup";
     public const string AdminImport = "admin.import";
 
+    /// <summary>
+    /// Pseudo-permission for menu items reserved to the ADMIN role (§16: reset, restore). It is NOT in <see cref="All"/>,
+    /// so it can never be granted to another role; <c>UserSession.Can</c> returns true only for ADMIN.
+    /// </summary>
+    public const string AdminRoleOnly = "@role:admin";
+
     public sealed record Definition(string Code, string Name, string Module);
 
     public static readonly IReadOnlyList<Definition> All =

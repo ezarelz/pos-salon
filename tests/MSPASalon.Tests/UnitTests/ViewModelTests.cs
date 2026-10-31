@@ -53,7 +53,7 @@ public sealed class ViewModelTests : IDisposable
         a.Customers, a.Suppliers, a.Categories, a.Employees, a.Products, a.Services, a.PaymentMethods, a.Roles,
         a.Users, a.Auth, a.Branch, a.Backup, a.Dashboard, a.LegacyImport, a.Clock,
         a.Registrations, a.Treatments, a.Sales, a.Purchases, a.Adjustments, a.StockCards, print ?? new FakePrint(), theme ?? new FakeTheme(),
-        a.Reports, a.ReportExporter);
+        a.Reports, a.ReportExporter, a.Administration);
 
     [Test("VM-01", "Editor produk: input Indonesia ('28.000', '0,5') tersimpan; input salah tampil di ErrorText")]
     public void ProductEditor()

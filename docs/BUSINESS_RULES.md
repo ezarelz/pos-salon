@@ -1,4 +1,4 @@
-# POS Salon — Business Rules (v0.5)
+# POS Salon — Business Rules (v0.6)
 
 Dokumen ini adalah **sumber kebenaran** untuk aplikasi baru. Aplikasi lama hanya referensi.
 Penanda: **[KEPUTUSAN]** = sudah disepakati pengguna · **[ASUMSI]** = default sementara, perlu konfirmasi, diisolasi agar mudah diubah.
@@ -203,6 +203,11 @@ Laporan **Total Pendapatan** = Penjualan POSTED + Process LUNAS. Registry **buka
 | L3 | Nilai uang memakai **snapshot** di dokumen (harga, komisi, HPP, biaya bahan), bukan master saat laporan dibuka. |
 | L4 | Pembatalan susulan mengubah laporan periode lama (tidak ada penguncian periode); jejaknya ada di Laporan Pembatalan. |
 | L5 | Semua laporan dapat dicetak, diexport **.xlsx**, dan disimpan **.pdf** (T3, T4). |
+| L6 | Biaya bahan baris jasa yang diposting **sebelum migrasi 003** (tanpa snapshot) diestimasi dari resep & harga pokok master saat laporan dibuka, dan ditandai (kolom "Estimasi" + catatan). |
+| L7 | Laporan Stok: Akhir = Awal + Beli − Jual − Treatment ± Adjustment + Saldo awal (OPENING), dari stock ledger. **Nilai stok** = qty akhir × harga pokok master saat ini (standard cost, A6); nilai pemakaian bahan memakai harga pokok saat treatment. Produk nonaktif hanya tampil bila masih ada stok/mutasi. |
+| L8 | Laporan Pembatalan berdasarkan **waktu pembatalan**. Registrasi yang batal karena treatment-nya dibatalkan ditampilkan sekali (sebagai treatment). Dokumen yang dibatalkan sebelum migrasi 003 mengambil nama user dari teks alasan "(oleh …)". |
+| L9 | Laporan Kunjungan Customer dihitung **per tanggal** (default hari ini), hanya customer **aktif dan bukan walk-in**. **Total belanja** = treatment LUNAS + penjualan produk POSTED atas nama customer. Rata-rata jarak = (kunjungan terakhir − pertama) ÷ (jumlah kunjungan − 1). |
+| L10 | Batas hari status kunjungan (K23) dan penanda Registrasi (K24) disimpan di `app_setting` dan diatur di **Pengaturan Salon**; validasi 1 ≤ Aktif < Tidak aktif ≤ 3650. |
 
 **Daftar laporan**
 | No | Laporan | Isi | Izin | Tahap |

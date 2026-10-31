@@ -6,7 +6,7 @@ Dibangun ulang dari nol menggantikan aplikasi MSPA Salon lama (lihat `docs/PHASE
 
 **Teknologi:** .NET 8 · C# 12 · WPF · SQLite · Dapper · CommunityToolkit.Mvvm
 
-**Status: Milestone M4a** (lihat `CHANGELOG.md`): laporan Rekap Kas Harian, Pendapatan, Komisi Capster + export Excel/PDF, format nota + logo, dashboard harian, mode gelap, master data, user & role, login, import data lama, backup, shell responsif,
+**Status: Milestone M4c** (lihat `CHANGELOG.md`): 8 laporan (Rekap Kas, Pendapatan, Komisi, Jasa & Margin, Produk & Laba Kotor, Stok, Pembatalan, Kunjungan Customer) + export Excel/PDF, format nota + logo, dashboard harian, mode gelap, master data, user & role, login, import data lama, backup, shell responsif,
 registrasi → proses treatment → pembayaran + backflush + nota 58 mm, penjualan, pembelian, stock adjustment, kartu stok.
 Laporan & export menyusul di M4. Rencana lengkap: `docs/TECHNICAL_ARCHITECTURE.md` §6.
 

@@ -1,9 +1,9 @@
-# MSPA Salon — Test Cases (M1–M3.2)
+# POS Salon — Test Cases (M1–M4a)
 
 Jalankan: `dotnet run --project tests/MSPASalon.Tests` (filter: tambahkan `-- INT-` / `-- UNIT-` / `-- VM-`).
 Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 
-**Hasil eksekusi M3.2 (Linux, .NET 8.0.133): 71 / 71 PASS** (M1: 38, M2/M3: 28, dashboard: 2, nota: 3).
+**Hasil eksekusi M4a (Linux, .NET 8.0.133): 81 / 81 PASS** (M1: 38, M2/M3: 28, dashboard: 3, nota: 3, M4a: 10).
 
 ## Unit — aturan domain
 
@@ -121,10 +121,28 @@ Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 | INT-LOGO-01 | Logo nota: migrasi 002, simpan/hapus; format & ukuran divalidasi; data salon lain tidak berubah | PASS |
 | VM-14 | Pengaturan Salon: pilih logo → tersimpan & ikut dikirim ke printer bersama struk | PASS |
 
+## Laporan (M4a)
+
+| ID | Skenario | Hasil |
+|---|---|---|
+| M4-01 | Migrasi 003: snapshot biaya bahan per baris jasa saat LUNAS; batal mencatat cancelled_by/at + audit_log | PASS |
+| M4-02 | Izin laporan: ADMIN semua izin baru; KASIR baru = view+customer; upgrade KASIR lama hanya dapat izin baru | PASS |
+| M4-03 | Rekap Kas Harian: per metode (tagihan, bukan uang diterima), tunai di laci, daftar nota + referensi, batal tidak dihitung | PASS |
+| M4-04 | Laporan Pendapatan: semua hari dalam periode (termasuk 0), jasa bruto/diskon/neto, produk, total = rekap metode = dashboard | PASS |
+| M4-05 | Laporan Komisi: ringkasan & rincian per capster, filter capster = slip bertanda tangan, diskon tidak memotong komisi, batal = 0 | PASS |
+| UNIT-17 | Periode laporan: pilihan cepat (minggu mulai Senin, 1–15 / 16–akhir, bulan lalu), teks periode, validasi | PASS |
+| UNIT-18 | Export Excel: .xlsx valid (zip + XML), sheet per bagian, angka & tanggal bertipe, karakter khusus aman | PASS |
+| UNIT-19 | Struk rekap kas 58 mm: per metode, total, tunai di laci, kolom paraf; semua baris ≤ 32 karakter | PASS |
+| VM-15 | Halaman laporan: hak akses menu, periode cepat/manual, validasi tanggal, export Excel, PDF, struk rekap 58 mm | PASS |
+| DASH-03 | Dashboard: komisi capster hanya tampil bagi user dengan izin laporan komisi | PASS |
+
+INT-01 diperbarui: kini membuat database v1 sungguhan lalu meng-upgrade ke v3.
+
 ## Verifikasi tambahan
 
 | Item | Hasil |
 |---|---|
 | Import CLI terhadap **salinan `salon.sqlite` asli** | 10 produk (saldo awal total 566), 6 jasa, 3 karyawan, 1 customer (+ walk-in lama dilebur), user kasir; hash file lama sebelum = sesudah |
 | Verifikasi statis XAML (XML valid, semua `StaticResource` terdefinisi, semua binding ke properti yang ada) | Lolos |
+| File .xlsx laporan dibuka dengan pembaca independen (openpyxl) | Lolos: 4 sheet, tanggal bertipe tanggal, angka bertipe angka (`#,##0`), total tebal, header beku |
 | Build & tampilan proyek WPF | **Belum diverifikasi**: harus di Windows (lihat `UAT_RESPONSIVE_CHECKLIST.md`) |

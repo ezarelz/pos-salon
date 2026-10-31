@@ -58,6 +58,7 @@ Dokumen ini merangkum desain dan alasannya.
 | `purchase` / `purchase_line` | Pembelian | `qty_x > 0`, harga ≥ 0 |
 | `stock_adjustment` / `_line` | Adjustment/opname, qty bertanda, nilai harga pokok | `qty_x ≠ 0`, alasan wajib |
 | `payment` | Satu pembayaran per dokumen | `UNIQUE(source_type, source_id)`, `amount_received ≥ amount_due`, `change = received − due`, non-tunai tanpa kembalian |
+| `audit_log` | **Jejak audit permanen** (migrasi 003): pembatalan, reset, restore — waktu, user, aksi, dokumen, keterangan. Tidak dihapus oleh reset data (§16) | indeks `at` |
 | `stock_ledger` | **Sumber kebenaran stok** | Tepat satu dari `qty_in_x`/`qty_out_x` > 0; `UNIQUE(source_type, source_id, source_line_id, product_id)` mencegah double posting |
 
 ## 3. Relasi utama
@@ -88,7 +89,8 @@ Index tambahan untuk laporan dan antrian: status + tanggal registrasi/treatment,
 
 * File `NNN_deskripsi.sql` di `Database/Migrations`, di-embed ke assembly.
 * `DatabaseInitializer.Initialize()` dipanggil setiap start: menerapkan migrasi yang belum ada (masing-masing satu transaksi), lalu seed data referensi secara idempotent (permission, role bawaan, baris branch, metode bayar, customer walk-in, admin pertama). **Tidak pernah** menanam data sampel.
-* Perubahan skema berikutnya = file migrasi baru (`002_….sql`), jangan mengubah file lama.
+* Perubahan skema berikutnya = file migrasi baru (`004_….sql`), jangan mengubah file lama.
+* **Migrasi 003** (M4a): `treatment_line.material_cost` (snapshot biaya bahan per baris jasa saat LUNAS; `NULL` = transaksi sebelum 003, laporan memakai estimasi), `cancelled_by` + `cancelled_at` di registrasi/treatment/penjualan/pembelian/adjustment, tabel `audit_log`, indeks `payment(paid_at)`, `sale(posted_at)`, `sale(customer_id)`, `treatment_line(treatment_id)`.
 
 ## 7. Lokasi & backup
 

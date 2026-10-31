@@ -73,4 +73,4 @@ Target uji: 1280×720, 1366×768, 1920×1080 × skala 100/125/150%. Kombinasi te
 | **M1** | Solution, skema lengkap, migrasi, penomoran, stock ledger, master data + resep jasa, user/role, login, backup, import master, shell WPF responsif, dashboard | **Selesai** (non-WPF: build + 38 test lolos; WPF: perlu build di Windows) |
 | M2 | Registrasi → Proses Treatment (antrian, mulai, ubah jasa/capster, selesai & bayar, backflush, batal), cetak nota 58 mm | Selesai |
 | M3 | Penjualan produk, pembelian, stock adjustment, kartu stok | Selesai |
-| M4 | Laporan (pendapatan, komisi, margin jasa, stok, rekap metode bayar) + export Excel/PDF | Berikutnya |
+| M4 | Laporan (pendapatan, komisi, margin jasa, stok, rekap metode bayar) + export Excel/PDF | M4a selesai (rekap kas, pendapatan, komisi, export); M4b–M4d berikutnya (BUSINESS_RULES §14–16) |

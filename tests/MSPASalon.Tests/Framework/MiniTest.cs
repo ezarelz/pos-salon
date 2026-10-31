@@ -93,7 +93,7 @@ public static class TestRunner
             catch (TargetInvocationException tie)
             {
                 var ex = tie.InnerException ?? tie;
-                error = ex is AssertionException ? ex.Message : $"{ex.GetType().Name}: {ex.Message}";
+                error = ex is AssertionException ? ex.Message : $"{ex.GetType().Name}: {ex.Message} @ {FirstFrame(ex)}";
             }
             catch (Exception ex)
             {
@@ -109,7 +109,13 @@ public static class TestRunner
             Console.Write(error is null ? "  PASS " : "  FAIL ");
             Console.ResetColor();
             Console.WriteLine($"{attr.Id,-8} {attr.Description}");
-            if (error is not null) Console.WriteLine($"         → {error}");
+            if (error is not null)
+            {
+                Console.WriteLine($"         → {error}");
+                // On GitHub Actions, failures become annotations (visible on the PR and readable through the API).
+                if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+                    Console.WriteLine($"::error title=Test {attr.Id}::{Escape($"{attr.Description} → {error}")}");
+            }
         }
 
         var passed = results.Count(r => r.Passed);
@@ -118,6 +124,12 @@ public static class TestRunner
         WriteReport(results);
         return passed == results.Count && results.Count > 0 ? 0 : 1;
     }
+
+    private static string FirstFrame(Exception ex) =>
+        ex.StackTrace?.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Length > 0) ?? "-";
+
+    /// <summary>GitHub workflow-command escaping for annotation messages.</summary>
+    private static string Escape(string s) => s.Replace("%", "%25").Replace("\r", "%0D").Replace("\n", "%0A");
 
     private static void WriteReport(List<Result> results)
     {

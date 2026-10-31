@@ -17,7 +17,8 @@ public static class LegacySchema
 
     public static void CreateV1(string path, bool withCashierRole)
     {
-        using var c = new SqliteConnection($"Data Source={path}");
+        // Pooling off: a pooled handle would keep the file locked on Windows after this method returns.
+        using var c = new SqliteConnection($"Data Source={path};Pooling=False");
         c.Open();
         var v1 = DatabaseInitializer.LoadMigrations().Single(m => m.Version == 1);
         c.Execute(v1.Sql);

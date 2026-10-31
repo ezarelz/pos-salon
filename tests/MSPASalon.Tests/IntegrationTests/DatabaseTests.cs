@@ -26,7 +26,7 @@ public sealed class DatabaseTests : IDisposable
         // Upgrade path of a real M1–M3.1 database (schema v1, with data): 002 + 003 are applied, data stays.
         var oldPath = Path.Combine(_db.Directory, "v1.db");
         LegacySchema.CreateV1(oldPath, withCashierRole: true);
-        using (var v1 = new SqliteConnection($"Data Source={oldPath}"))
+        using (var v1 = new SqliteConnection($"Data Source={oldPath};Pooling=False"))
         {
             v1.Open();
             v1.Execute("UPDATE branch SET name = 'Salon Lama' WHERE id = 1");

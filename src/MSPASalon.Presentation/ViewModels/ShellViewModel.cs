@@ -124,7 +124,10 @@ public sealed class ShellViewModel : ViewModelBase
             new("Master", "Kategori Produk", "master:category", "", Permissions.MasterCategory),
             new("Master", "Metode Bayar", "master:paymentmethod", "", Permissions.MasterPaymentMethod),
 
-            new("Laporan", "Laporan", "report", "", Permissions.ReportView, "M4"),
+            new("Laporan", "Rekap Kas Harian", "report:cash", "\uE8C7", Permissions.ReportView),
+            new("Laporan", "Pendapatan", "report:revenue", "\uE9D2", Permissions.ReportFinance),
+            new("Laporan", "Komisi Capster", "report:commission", "\uE716", Permissions.ReportCommission),
+            new("Laporan", "Laporan Lainnya", "report:more", "\uE7C3", Permissions.ReportView, "M4b/M4c"),
 
             new("Pengaturan", "Pengaturan Salon", "settings:branch", "", Permissions.SettingsBranch),
             new("Pengaturan", "User", "master:user", "", Permissions.MasterUser),
@@ -159,14 +162,20 @@ public sealed class ShellViewModel : ViewModelBase
     {
         if (item.IsComingSoon)
             return new ComingSoonViewModel(item.Key, item.Title, item.Milestone!,
-                "Modul ini dijadwalkan pada milestone berikutnya. Aturan bisnisnya sudah ditetapkan di BUSINESS_RULES.md dan struktur databasenya sudah tersedia.");
+                item.Key == "report:more"
+                    ? "Jasa & Margin dan Produk & Laba Kotor (M4b); Stok, Pembatalan, dan Kunjungan Customer (M4c). Spesifikasinya sudah disetujui di BUSINESS_RULES.md §14."
+                    : "Modul ini dijadwalkan pada milestone berikutnya. Aturan bisnisnya sudah ditetapkan di BUSINESS_RULES.md dan struktur databasenya sudah tersedia.");
 
         bool Can(string p) => Session.Can(p);
         var d = _dialogs;
         return item.Key switch
         {
             "dashboard" => new DashboardViewModel(_s.Dashboard, _s.Clock, SalonName, Session.User.DisplayName,
-                NavItems.Where(n => n.Key is "trans:registration" or "trans:treatment" or "trans:sale").ToList(), Navigate),
+                NavItems.Where(n => n.Key is "trans:registration" or "trans:treatment" or "trans:sale").ToList(), Navigate,
+                showCommission: Can(Permissions.ReportCommission)),
+            "report:cash" => new Reports.CashDailyReportViewModel(_s, d, Session),
+            "report:revenue" => new Reports.RevenueReportViewModel(_s, d, Session),
+            "report:commission" => new Reports.CommissionReportViewModel(_s, d, Session),
 
             "master:customer" => new ListPageViewModel<Customer>(item.Key, item.Title,
                 [

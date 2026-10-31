@@ -41,6 +41,16 @@ public sealed class DialogService : IDialogService
         return dlg.ShowDialog(Owner) == true ? dlg.FileName : null;
     }
 
+    public string? PickSaveFile(string title, string filter, string defaultFileName)
+    {
+        var dlg = new SaveFileDialog
+        {
+            Title = title, Filter = filter, FileName = defaultFileName, AddExtension = true, OverwritePrompt = true,
+            DefaultExt = System.IO.Path.GetExtension(defaultFileName),
+        };
+        return dlg.ShowDialog(Owner) == true ? dlg.FileName : null;
+    }
+
     public string? PickFolder(string title)
     {
         // OpenFolderDialog is available in WPF since .NET 8.

@@ -505,11 +505,148 @@
         </Grid>
     </DataTemplate>
 
+
+    <!-- ================================================================== reports (M4) -->
+    <!--
+        One template for every ReportPageViewModel (decision T2):
+          row 0  title + period · actions (Cetak / PDF / Excel, optional thermal print)  (Auto)
+          row 1  filters: quick period, dates, optional extra filter                     (Auto)
+          row 2  error / status                                                          (Auto)
+          row 3  summary cards (wrap)                                                    (Auto)
+          row 4  one tab per section, each a read-only grid                              (*)
+          row 5  notes                                                                   (Auto)
+    -->
+    <DataTemplate x:Key="ReportTemplate">
+        <Grid Margin="16,12,16,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" MinHeight="160" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Button Content="{Binding ExtraPrintLabel}" Command="{Binding ExtraPrintCommand}" Margin="0,0,8,6"
+                            Visibility="{Binding HasExtraPrint, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                    <Button Command="{Binding PrintCommand}" Margin="0,0,8,6" ToolTip="Cetak A4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE749;" FontFamily="{StaticResource IconFont}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="Cetak" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding PdfCommand}" Margin="0,0,8,6" ToolTip="Simpan PDF (Microsoft Print to PDF)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xEA90;" FontFamily="{StaticResource IconFont}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="PDF" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding ExcelCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,0,6" ToolTip="Simpan sebagai Excel (.xlsx)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="Excel" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+                <StackPanel Margin="0,0,12,0">
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="{Binding PeriodText}" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </DockPanel>
+
+            <WrapPanel Grid.Row="1" Margin="0,0,0,6">
+                <ComboBox ItemsSource="{Binding Presets}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                          SelectedValue="{Binding SelectedPreset}" Width="200" Margin="0,0,12,6" ToolTip="Pilihan cepat periode" />
+                <TextBlock Text="Tanggal" VerticalAlignment="Center" Margin="0,0,6,6" Foreground="{DynamicResource MutedTextBrush}" />
+                <DatePicker SelectedDate="{Binding DateFrom}" Width="130" Margin="0,0,0,6" />
+                <TextBlock Text="s/d" VerticalAlignment="Center" Margin="6,0,6,6" Foreground="{DynamicResource MutedTextBrush}"
+                           Visibility="{Binding IsRange, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                <DatePicker SelectedDate="{Binding DateTo}" Width="130" Margin="0,0,0,6"
+                            Visibility="{Binding IsRange, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                <TextBlock Text="{Binding FilterLabel}" VerticalAlignment="Center" Margin="16,0,6,6" Foreground="{DynamicResource MutedTextBrush}"
+                           Visibility="{Binding HasFilter, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                <ComboBox ItemsSource="{Binding FilterOptions}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                          SelectedValue="{Binding FilterValue}" Width="220" Margin="0,0,8,6" IsTextSearchEnabled="True"
+                          Visibility="{Binding HasFilter, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                <Button Content="&#xE72C;" Style="{StaticResource IconButton}" Command="{Binding RefreshCommand}" ToolTip="Muat ulang" Margin="8,0,0,6" />
+            </WrapPanel>
+
+            <StackPanel Grid.Row="2">
+                <Border Style="{StaticResource ErrorBox}" Margin="0,0,0,8"
+                        Visibility="{Binding HasError, Converter={x:Static conv:Conv.BoolToVisibility}}">
+                    <TextBlock Text="{Binding ErrorText}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" />
+                </Border>
+                <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource SuccessBrush}" TextWrapping="Wrap" Margin="0,0,0,6"
+                           Visibility="{Binding StatusText, Converter={x:Static conv:Conv.HasValueToVisibility}}" />
+            </StackPanel>
+
+            <ItemsControl Grid.Row="3" ItemsSource="{Binding Summary}" Focusable="False" Margin="0,0,0,8">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" Padding="12,8" Margin="0,0,8,8" MinWidth="170">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Label}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                                <TextBlock Text="{Binding Value}" FontSize="17" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TabControl Grid.Row="4" ItemsSource="{Binding Sections}" SelectedItem="{Binding SelectedSection}"
+                        Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Title}" />
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <DataGrid ItemsSource="{Binding Rows}" c:ReportGrid.Section="{Binding}" IsReadOnly="True"
+                                      CanUserSortColumns="False" BorderThickness="0">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsTotal}" Value="True">
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                            </DataGrid>
+                            <TextBlock Text="{Binding EmptyText}" Foreground="{DynamicResource MutedTextBrush}" Margin="12,44,12,12"
+                                       HorizontalAlignment="Center" VerticalAlignment="Top" TextWrapping="Wrap"
+                                       Visibility="{Binding IsEmpty, Converter={x:Static conv:Conv.BoolToVisibility}}" />
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+
+            <ItemsControl Grid.Row="5" ItemsSource="{Binding Notes}" Focusable="False" Margin="0,6,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Style="{StaticResource HintText}" FontStyle="Italic" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </DataTemplate>
+
     <v:PageTemplateSelector x:Key="PageSelector"
                             ListTemplate="{StaticResource ListPageTemplate}"
                             DashboardTemplate="{StaticResource DashboardTemplate}"
                             BranchTemplate="{StaticResource BranchTemplate}"
                             ComingSoonTemplate="{StaticResource ComingSoonTemplate}"
                             TreatmentTemplate="{StaticResource TreatmentTemplate}"
-                            StockCardTemplate="{StaticResource StockCardTemplate}" />
+                            StockCardTemplate="{StaticResource StockCardTemplate}"
+                            ReportTemplate="{StaticResource ReportTemplate}" />
 </ResourceDictionary>

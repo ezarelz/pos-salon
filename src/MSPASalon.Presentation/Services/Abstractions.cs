@@ -14,6 +14,8 @@ public interface IDialogService
     bool ShowEditor(EditorViewModel editor);
     string? PickOpenFile(string title, string filter);
     string? PickFolder(string title);
+    /// <summary>Save-as dialog. Returns the chosen path, or null when cancelled.</summary>
+    string? PickSaveFile(string title, string filter, string defaultFileName);
 }
 
 /// <summary>All application services the presentation layer uses (Core contracts only, no infrastructure).</summary>
@@ -40,7 +42,9 @@ public sealed record PresentationServices(
     IAdjustmentService Adjustments,
     IStockCardService StockCards,
     IPrintService Print,
-    IThemeService Theme);
+    IThemeService Theme,
+    IReportService Reports,
+    IReportExporter ReportExporter);
 
 /// <summary>Light/dark appearance. The choice is per computer (not per user) and survives restarts.</summary>
 public interface IThemeService
@@ -57,4 +61,10 @@ public interface IPrintService
     /// Returns false when the user cancelled.
     /// </summary>
     bool PrintReceipt(IReadOnlyList<string> lines, int paperWidthMm, string jobName, byte[]? logo = null);
+
+    /// <summary>
+    /// Prints a report on A4. With <paramref name="toPdf"/> the "Microsoft Print to PDF" printer is preselected
+    /// (decision T4); the user still confirms and chooses the file name. Returns false when cancelled.
+    /// </summary>
+    bool PrintReport(MSPASalon.Core.Reports.ReportDocument document, bool toPdf);
 }

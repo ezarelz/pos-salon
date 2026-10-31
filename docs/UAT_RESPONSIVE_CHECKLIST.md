@@ -110,3 +110,17 @@ Hasil: ✔ / ✘ + catatan singkat.
 | F-48 | Registrasi Baru → pilih customer lama | Kotak "Terakhir datang X hari lalu · jasa dengan capster" | |
 | F-49 | Pengaturan Salon → Aktif 60, Tidak aktif 30 → Simpan | Ditolak dengan pesan batas hari | |
 | F-50 | Login KASIR → menu Laporan | Rekap Kas, Stok, Kunjungan Customer saja | |
+
+## Reset & Restore (M4d) — uji dengan SALINAN database
+
+| ID | Test Step | Expected Test Result | Hasil |
+|---|---|---|---|
+| F-51 | Login KASIR / role lain → menu Pengaturan | Restore Backup & Reset Data Transaksi tidak tampil | |
+| F-52 | Login ADMIN → Reset Data Transaksi | Jumlah data & rentang tanggal tampil; tombol nonaktif | |
+| F-53 | Isi password + ketik `reset` (huruf kecil) | Tombol tetap nonaktif | |
+| F-54 | Ketik `RESET` → Reset → Tidak | Tidak ada perubahan | |
+| F-55 | Pilih "pertahankan stok" → Reset → Ya | Pesan selesai + lokasi backup; transaksi 0; stok produk sama | |
+| F-56 | Kartu Stok produk mana pun | Satu baris "Saldo awal" | |
+| F-57 | Registrasi baru | Nomor `…/RG/0001` | |
+| F-58 | Restore Backup → pilih file `…_sebelum-reset.db` → password → Restore | Ringkasan isi tampil; setelah restore kembali ke login; transaksi lama kembali | |
+| F-59 | Restore → pilih file bukan backup (mis. .txt diganti .db) | Pesan "bukan database SQLite"/"bukan backup aplikasi" | |

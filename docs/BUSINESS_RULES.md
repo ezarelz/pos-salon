@@ -1,4 +1,4 @@
-# POS Salon — Business Rules (v0.6)
+# POS Salon — Business Rules (v0.7)
 
 Dokumen ini adalah **sumber kebenaran** untuk aplikasi baru. Aplikasi lama hanya referensi.
 Penanda: **[KEPUTUSAN]** = sudah disepakati pengguna · **[ASUMSI]** = default sementara, perlu konfirmasi, diisolasi agar mudah diubah.
@@ -247,3 +247,12 @@ Izin baru otomatis dimiliki role ADMIN; role lain mengikuti centang di menu Role
 Alur: pratinjau jumlah data & rentang tanggal → peringatan bila ada transaksi > 14 hari (R4) → pilih perlakuan stok (R1) → password ulang + ketik "RESET" → backup otomatis → hapus dalam satu transaksi → stok dihitung ulang → catat di `audit_log` → VACUUM.
 
 **Restore:** pilih file backup → validasi (file database aplikasi ini, versi skema ≤ versi aplikasi) → backup otomatis database saat ini → ganti database → aplikasi meminta restart; migrasi yang belum ada diterapkan saat dibuka.
+
+**Implementasi (M4d):**
+| Aturan | Ketentuan |
+|---|---|
+| D1 | Menu **Pengaturan → Restore Backup** dan **Reset Data Transaksi** hanya tampil untuk role **ADMIN** (pseudo-izin `@role:admin`, tidak ada di daftar hak akses sehingga tidak bisa diberikan ke role lain). Layanan memeriksa ulang role dan password ke database pada setiap eksekusi. |
+| D2 | Kata konfirmasi harus tepat `RESET` (huruf besar). Setelah itu masih ada dialog konfirmasi akhir yang merangkum jumlah data, perlakuan stok, dan folder backup. |
+| D3 | Folder backup otomatis default: `backup` di sebelah file database (`%LOCALAPPDATA%\MSPASalon\backup`), bisa diganti. Nama file berlabel `…_sebelum-reset.db` / `…_sebelum-restore.db` dan tidak pernah menimpa file lain. |
+| D4 | Mode "pertahankan stok": saldo awal = saldo **stock ledger** tiap produk (sumber kebenaran), dicatat sebagai mutasi `OPENING` nomor `SALDO-AWAL-yyyyMMdd` dengan harga pokok master saat ini. Saldo minus tetap dibawa dan diberi peringatan. |
+| D5 | Restore juga meminta password ADMIN. Isi file backup disalin ke database aktif dengan SQLite backup API (tanpa mengganti file yang sedang dipakai); backup versi lama langsung dimigrasikan. Setelah restore aplikasi kembali ke layar login, karena user & password mengikuti isi backup. |

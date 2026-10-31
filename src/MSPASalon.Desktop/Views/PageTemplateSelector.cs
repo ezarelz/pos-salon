@@ -19,6 +19,8 @@ public sealed class PageTemplateSelector : DataTemplateSelector
     public DataTemplate? TreatmentTemplate { get; set; }
     public DataTemplate? StockCardTemplate { get; set; }
     public DataTemplate? ReportTemplate { get; set; }
+    public DataTemplate? ResetDataTemplate { get; set; }
+    public DataTemplate? RestoreTemplate { get; set; }
 
     public override DataTemplate? SelectTemplate(object item, DependencyObject container) => item switch
     {
@@ -29,6 +31,8 @@ public sealed class PageTemplateSelector : DataTemplateSelector
         TreatmentPageViewModel => TreatmentTemplate,
         StockCardPageViewModel => StockCardTemplate,
         MSPASalon.Presentation.ViewModels.Reports.ReportPageViewModel => ReportTemplate,
+        ResetDataPageViewModel => ResetDataTemplate,
+        RestorePageViewModel => RestoreTemplate,
         _ => base.SelectTemplate(item, container),
     };
 }

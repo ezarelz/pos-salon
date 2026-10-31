@@ -1,5 +1,21 @@
 # Changelog
 
+## M4d — 2026-10-31 (.NET 8)
+
+Alat go-live sesuai BUSINESS_RULES v0.7 §16 (R1–R5, D1–D5). Khusus role **ADMIN**. Tidak ada migrasi database baru.
+
+- **Pengaturan → Reset Data Transaksi**: pratinjau jumlah data & rentang tanggal; peringatan keras bila ada transaksi > 14 hari;
+  pilihan stok **nol** atau **stok saat ini jadi saldo awal**; password + ketik `RESET` + konfirmasi akhir; **backup otomatis wajib**
+  (gagal = tidak ada yang dihapus); satu transaksi database; nomor nota kembali ke 0001; master, customer, user, pengaturan, logo, dan
+  jejak audit tetap; dicatat di `audit_log`; file database dirapikan (VACUUM).
+- **Pengaturan → Restore Backup**: pilih file → ringkasan isi (salon, versi, jumlah transaksi, transaksi terakhir) → password → restore.
+  File divalidasi (SQLite, backup aplikasi ini, tidak dari versi lebih baru, tidak rusak). Database aktif dibackup dulu; backup versi lama
+  dimigrasikan otomatis; dicatat di `audit_log`; aplikasi kembali ke layar login.
+- Backup kini bisa berlabel (`…_sebelum-reset.db`, `…_sebelum-restore.db`) dan tidak pernah menimpa file lain.
+
+**Verifikasi:** 92/92 test lolos (baru: M4-11..14, VM-17), termasuk reset & restore nyata pada database SQLite dan restore backup v1.
+Tampilan WPF **belum diuji** di Windows.
+
 ## M4b + M4c — 2026-10-31 (.NET 8)
 
 Sisa laporan BUSINESS_RULES v0.6 §14 (aturan tambahan L6–L10). Tidak ada migrasi database baru.

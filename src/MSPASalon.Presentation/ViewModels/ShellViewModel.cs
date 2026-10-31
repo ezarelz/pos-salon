@@ -137,6 +137,8 @@ public sealed class ShellViewModel : ViewModelBase
             new("Pengaturan", "Pengaturan Salon", "settings:branch", "", Permissions.SettingsBranch),
             new("Pengaturan", "User", "master:user", "", Permissions.MasterUser),
             new("Pengaturan", "Role & Hak Akses", "master:role", "", Permissions.MasterRole),
+            new("Pengaturan", "Restore Backup", "admin:restore", "\uE777", Permissions.AdminRoleOnly),
+            new("Pengaturan", "Reset Data Transaksi", "admin:reset", "\uE74D", Permissions.AdminRoleOnly),
         };
         NavItems.Clear();
         foreach (var item in all.Where(i => i.Permission is null || Session.Can(i.Permission))) NavItems.Add(item);
@@ -176,6 +178,8 @@ public sealed class ShellViewModel : ViewModelBase
             "dashboard" => new DashboardViewModel(_s.Dashboard, _s.Clock, SalonName, Session.User.DisplayName,
                 NavItems.Where(n => n.Key is "trans:registration" or "trans:treatment" or "trans:sale").ToList(), Navigate,
                 showCommission: Can(Permissions.ReportCommission)),
+            "admin:reset" => new ResetDataPageViewModel(_s, d, Session),
+            "admin:restore" => new RestorePageViewModel(_s, d, Session, () => LogoutRequested?.Invoke(this, EventArgs.Empty)),
             "report:cash" => new Reports.CashDailyReportViewModel(_s, d, Session),
             "report:revenue" => new Reports.RevenueReportViewModel(_s, d, Session),
             "report:commission" => new Reports.CommissionReportViewModel(_s, d, Session),

@@ -1,9 +1,9 @@
-# POS Salon — Test Cases (M1–M4c)
+# POS Salon — Test Cases (M1–M4d)
 
 Jalankan: `dotnet run --project tests/MSPASalon.Tests` (filter: tambahkan `-- INT-` / `-- UNIT-` / `-- VM-`).
 Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 
-**Hasil eksekusi M4c (Linux, .NET 8.0.133): 87 / 87 PASS** (M1: 38, M2/M3: 28, dashboard: 3, nota: 3, M4: 16).
+**Hasil eksekusi M4d (Linux, .NET 8.0.133): 92 / 92 PASS** (M1: 38, M2/M3: 28, dashboard: 3, nota: 3, M4: 21).
 
 ## Unit — aturan domain
 
@@ -144,6 +144,16 @@ Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 | VM-16 | M4b/M4c di aplikasi: menu per izin, pengaturan batas hari (validasi), penanda di Registrasi, riwayat di Master Customer | PASS |
 
 INT-01 diperbarui: kini membuat database v1 sungguhan lalu meng-upgrade ke v3.
+
+## Reset & Restore (M4d)
+
+| ID | Skenario | Hasil |
+|---|---|---|
+| M4-11 | Reset (stok nol): semua transaksi & ledger terhapus, master/customer/user/pengaturan/logo/audit tetap, nomor nota kembali 0001, backup berisi data lama | PASS |
+| M4-12 | Reset (pertahankan stok): stok setiap produk menjadi saldo awal OPENING di ledger; kartu stok mulai dari saldo awal; stok minus diberi peringatan | PASS |
+| M4-13 | Pengaman reset: password/konfirmasi salah, role bukan ADMIN, backup gagal → ditolak tanpa perubahan; data > 14 hari diberi peringatan | PASS |
+| M4-14 | Restore: validasi file (bukan DB / bukan aplikasi ini / versi lebih baru), backup otomatis DB aktif, data kembali, backup versi lama dimigrasikan, audit | PASS |
+| VM-17 | Halaman Reset & Restore: tombol aktif hanya dengan password + 'RESET', konfirmasi akhir, hasil tampil; restore memicu login ulang | PASS |
 
 ## Verifikasi tambahan
 

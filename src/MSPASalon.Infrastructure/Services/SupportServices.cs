@@ -87,10 +87,13 @@ public sealed class BackupService(DbConnectionFactory db, IClock clock) : IBacku
 {
     public string DatabasePath => db.DatabasePath;
 
-    public string Backup(string targetDirectory)
+    public string Backup(string targetDirectory, string? label = null)
     {
         Directory.CreateDirectory(targetDirectory);
-        var file = Path.Combine(targetDirectory, $"mspasalon_{clock.Now:yyyyMMdd_HHmmss}.db");
+        var suffix = string.IsNullOrWhiteSpace(label) ? "" : "_" + label.Trim();
+        var file = Path.Combine(targetDirectory, $"mspasalon_{clock.Now:yyyyMMdd_HHmmss}{suffix}.db");
+        for (var n = 2; File.Exists(file); n++)   // two backups within the same second never overwrite each other
+            file = Path.Combine(targetDirectory, $"mspasalon_{clock.Now:yyyyMMdd_HHmmss}{suffix}_{n}.db");
         using var source = db.Open();
         using (var target = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = file, Pooling = false }.ToString()))
         {

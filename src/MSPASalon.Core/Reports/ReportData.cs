@@ -97,7 +97,8 @@ public sealed record StockRow(string Code, string Name, string Unit, bool IsSell
     /// <summary>Opening + purchases − sales − treatment use ± adjustments + opening-balance entries of the period.</summary>
     public decimal Closing => Opening + Purchase - Sale - Treatment + Adjustment + OpeningEntries;
     public decimal Value => Domain.Money.Round(Closing * UnitCost);
-    public bool BelowMin => Closing <= StockMin && StockMin > 0;
+    /// <summary>Strictly below the minimum (K38): closing = minimum is not flagged.</summary>
+    public bool BelowMin => Closing < StockMin && StockMin > 0;
     public bool HasMovement => Purchase != 0 || Sale != 0 || Treatment != 0 || Adjustment != 0 || OpeningEntries != 0;
 }
 

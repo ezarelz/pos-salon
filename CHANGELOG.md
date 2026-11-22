@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.0.1 — 2026-11-22
+
+Perbaikan dari pemakaian awal: daftar "Stok di bawah minimum" terlalu penuh karena produk dengan stok **sama dengan**
+minimum ikut ditampilkan.
+
+- **Dashboard & Laporan Stok**: "di bawah minimum" kini berarti stok **lebih kecil** dari minimum (K38). Produk dengan stok
+  = minimum tidak lagi tampil. Stok minus tetap tampil di dashboard. Tidak ada migrasi database.
+- Test baru DASH-04; UAT F-66..F-68.
+
+**Verifikasi:** sandbox tidak dapat menjalankan test (akses nuget.org diblokir). GitHub Actions (windows-latest): 93/93 test lolos,
+build seluruh solution termasuk WPF 0 warning/0 error, installer `POSSalon-Setup-2.0.1.exe` terbentuk. Belum: UAT F-66..F-68 di Windows.
+
 ## v2.0.0 (rilis) — 2026-10-31 (.NET 10 LTS)
 
 Persiapan rilis pertama. Fungsi aplikasi tidak berubah dari M4d.

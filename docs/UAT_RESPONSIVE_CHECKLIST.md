@@ -135,3 +135,11 @@ Hasil: ✔ / ✘ + catatan singkat.
 | F-63 | Mode gelap → tutup → buka lagi | Tetap gelap (palet tema terbaca dengan nama exe baru) | |
 | F-64 | Pasang installer yang sama/lebih baru saat aplikasi terbuka | Aplikasi ditutup; tidak terpasang dobel di Apps | |
 | F-65 | Uninstall | Program hilang; pesan lokasi data; `%LOCALAPPDATA%\MSPASalon` tetap ada | |
+
+## Perbaikan v2.0.1 — stok di bawah minimum (K38)
+
+| ID | Test Step | Expected Result | Hasil |
+|---|---|---|---|
+| F-66 | Produk stok 1, minimum 1 → buka Dashboard | Produk **tidak** tampil di "Stok di bawah minimum" | |
+| F-67 | Ubah minimum produk itu menjadi 2 → muat ulang Dashboard | Produk tampil: stok 1, minimum 2 | |
+| F-68 | Laporan Stok → filter "Di bawah minimum" | Isi sama dengan daftar Dashboard (produk minimum 0 tidak ikut) | |

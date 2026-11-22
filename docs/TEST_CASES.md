@@ -135,6 +135,7 @@ Hasil aktual terakhir ditulis otomatis ke `tests/TestResults/test-results.md`.
 | UNIT-19 | Struk rekap kas 58 mm: per metode, total, tunai di laci, kolom paraf; semua baris ≤ 32 karakter | PASS |
 | VM-15 | Halaman laporan: hak akses menu, periode cepat/manual, validasi tanggal, export Excel, PDF, struk rekap 58 mm | PASS |
 | DASH-03 | Dashboard: komisi capster hanya tampil bagi user dengan izin laporan komisi | PASS |
+| DASH-04 | Stok di bawah minimum (dashboard & Laporan Stok): hanya stok < minimum; stok = minimum tidak tampil (K38) | PASS |
 
 | M4-06 | Jasa & Margin: per jasa bruto − komisi − bahan (snapshot); baris lama tanpa snapshot diestimasi & ditandai; diskon hanya di total | PASS |
 | M4-07 | Produk & Laba Kotor: neto = bruto − diskon, HPP dari snapshot harga pokok (tidak berubah bila master diubah) | PASS |

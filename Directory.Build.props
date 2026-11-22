@@ -12,7 +12,7 @@
     <Deterministic>true</Deterministic>
     <Company>POS Salon</Company>
     <Product>POS Salon</Product>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
     <NeutralLanguage>id-ID</NeutralLanguage>
     <!-- CS1591: missing XML docs. Not required for an internal application. -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>

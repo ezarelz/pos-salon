@@ -192,7 +192,7 @@ public sealed class DashboardService(DbConnectionFactory db) : IDashboardService
 
         var low = c.Query<LowRow>("""
                 SELECT id, code, name, unit, stock_on_hand_x, stock_min_x FROM product
-                WHERE is_active = 1 AND stock_on_hand_x <= stock_min_x
+                WHERE is_active = 1 AND stock_on_hand_x < stock_min_x   -- strictly below (K38); stock = minimum is not listed
                 ORDER BY (stock_on_hand_x - stock_min_x), code LIMIT 50
                 """)
             .Select(r => new Product

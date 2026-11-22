@@ -1,4 +1,5 @@
 using MSPASalon.Core.Entities;
+using MSPASalon.Core.Reports;
 using MSPASalon.Presentation.ViewModels;
 using MSPASalon.Presentation.ViewModels.Transactions;
 using MSPASalon.Tests.Framework;
@@ -109,5 +110,25 @@ public sealed class DashboardTests : IDisposable
         shell.ToggleThemeCommand.Execute(null);
         Assert.True(theme.IsDark);
         Assert.Equal("Mode Terang", shell.ThemeLabel);
+    }
+
+    [Test("DASH-04", "Stok di bawah minimum (dashboard & Laporan Stok): hanya stok < minimum; stok = minimum tidak tampil")]
+    public void LowStockStrictlyBelowMinimum()
+    {
+        // fixture stock: Shampo 2, Masker 1, Air Mineral 10
+        void SetMin(long id, decimal min) { var p = A.Products.Get(id)!; p.StockMin = min; A.Products.Save(p); }
+        SetMin(_f.Shampoo, 2m);      // equal to minimum -> not listed
+        SetMin(_f.Mask, 1.5m);       // below minimum -> listed
+        SetMin(_f.Drink, 0m);        // no minimum -> not listed
+
+        var low = A.Dashboard.GetSummary(_f.Db.Clock.Now).LowStock;
+        Assert.Equal(1, low.Count, "hanya Masker Rambut");
+        Assert.Equal("Masker Rambut", low[0].Name);
+
+        SetMin(_f.Mask, 1m);         // now equal as well
+        Assert.Equal(0, A.Dashboard.GetSummary(_f.Db.Clock.Now).LowStock.Count, "stok = minimum tidak tampil");
+
+        Assert.False(new StockRow("P1", "X", "BTL", true, false, 2, 0, 0, 0, 0, 0, 1000, 2).BelowMin, "laporan: stok = minimum");
+        Assert.True(new StockRow("P1", "X", "BTL", true, false, 1.9m, 0, 0, 0, 0, 0, 1000, 2).BelowMin, "laporan: stok < minimum");
     }
 }

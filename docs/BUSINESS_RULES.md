@@ -1,4 +1,4 @@
-# POS Salon — Business Rules (v0.7)
+# POS Salon — Business Rules (v0.7.1)
 
 Dokumen ini adalah **sumber kebenaran** untuk aplikasi baru. Aplikasi lama hanya referensi.
 Penanda: **[KEPUTUSAN]** = sudah disepakati pengguna · **[ASUMSI]** = default sementara, perlu konfirmasi, diisolasi agar mudah diubah.
@@ -34,6 +34,7 @@ Penanda: **[KEPUTUSAN]** = sudah disepakati pengguna · **[ASUMSI]** = default s
 | K23 | Status kunjungan: **Aktif** < 30 hari · **Perlu diingatkan** 30–60 hari · **Tidak aktif** > 60 hari sejak kunjungan terakhir; batas dapat diubah di Pengaturan Salon. | 2026-10-31 |
 | K24 | Penanda "terakhir datang X hari lalu" di layar Registrasi, **opsional** (aktif/nonaktif di Pengaturan Salon). | 2026-10-31 |
 | K25 | Pilihan cepat periode laporan komisi: 1–15, 16–akhir bulan, 1 bulan penuh, plus tanggal bebas. | 2026-10-31 |
+| K38 | **Stok di bawah minimum** (Dashboard & filter Laporan Stok) = stok **lebih kecil** dari stok minimum. Stok **sama dengan** minimum tidak ditampilkan. Minimum 0 = tidak dipantau (dashboard tetap menampilkan stok minus). Atur minimum per produk sesuai kebiasaan belanja. | 2026-11-22 |
 | R1 | Reset data transaksi: Admin memilih perlakuan stok setiap kali reset — (a) nolkan semua, atau (b) stok saat ini menjadi saldo awal (OPENING). | 2026-10-31 |
 | R2 | Reset **tidak** menghapus customer; customer uji coba dihapus manual lewat Master Customer (disarankan setelah reset). | 2026-10-31 |
 | R3 | Pengaman reset: pratinjau jumlah data, password ulang + ketik "RESET", backup otomatis wajib (gagal → batal), satu transaksi atomik, jejak audit permanen. | 2026-10-31 |
@@ -178,6 +179,7 @@ Laporan **Total Pendapatan** = Penjualan POSTED + Process LUNAS. Registry **buka
 | Client selesai | Jumlah treatment LUNAS hari ini. Rata-rata = pendapatan jasa ÷ client selesai. |
 | Antrian | Kondisi saat ini: registrasi MENUNGGU + treatment DIKERJAKAN (tidak dibatasi tanggal). |
 | Rekap pembayaran | Per metode, Σ jumlah tagihan (bukan uang diterima), sehingga total rekap = pendapatan dan baris tunai = uang yang seharusnya ada di laci. |
+| Stok di bawah minimum | Produk aktif dengan stok **<** stok minimum (K38), diurutkan dari selisih terbesar, maks. 50 baris. |
 | Kinerja capster | Per capster: jumlah client, jumlah jasa, nilai jasa **sebelum** diskon nota (diskon ada di level header, P4). |
 
 ## 13. Asumsi (✔ = disetujui sebagai default, K18)

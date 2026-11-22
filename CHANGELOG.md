@@ -9,7 +9,8 @@ minimum ikut ditampilkan.
   = minimum tidak lagi tampil. Stok minus tetap tampil di dashboard. Tidak ada migrasi database.
 - Test baru DASH-04; UAT F-66..F-68.
 
-**Verifikasi:** test tidak dapat dijalankan di sandbox (akses nuget.org diblokir); dijalankan oleh GitHub Actions pada PR ini.
+**Verifikasi:** sandbox tidak dapat menjalankan test (akses nuget.org diblokir). GitHub Actions (windows-latest): 93/93 test lolos,
+build seluruh solution termasuk WPF 0 warning/0 error, installer `POSSalon-Setup-2.0.1.exe` terbentuk. Belum: UAT F-66..F-68 di Windows.
 
 ## v2.0.0 (rilis) — 2026-10-31 (.NET 10 LTS)
 
